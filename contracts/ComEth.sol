@@ -40,7 +40,6 @@ contract ComEth {
     struct Proposal {
         Vote vote;
         StatusVote statusVote;
-        bytes32 uuid;
         uint256 createdAt;
         address author;
         string proposition;
@@ -80,7 +79,6 @@ contract ComEth {
         _proposals[id] = Proposal({
             vote: vote_,
             statusVote: StatusVote.Running,
-            uuid: uuid_,
             createdAt: block.timestamp,
             author: msg.sender,
             proposition: proposition
