@@ -32,7 +32,6 @@ contract ComEth {
     struct User {
         address userAddress;
         bool isBanned;
-        bool hasVoted;
         bool hasPaid;
         bool isActive;
     }
@@ -59,6 +58,8 @@ contract ComEth {
 
     mapping(address => User) private _users;
     mapping(uint256 => Proposal) private _proposals;
+    mapping(address => mapping(uint256 => bool)) private _hasVoted;
+    mapping(uint256 => uint256) private _timeLimits;
 
     constructor(address comEthOwner_) {
         _comEthOwner = comEthOwner_;
@@ -70,7 +71,8 @@ contract ComEth {
     //votes
     function submitProposal(
         Vote vote_,
-        string memory proposition
+        string memory proposition,
+        uint256 timeLimit
     ) public returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
@@ -81,16 +83,37 @@ contract ComEth {
             author: msg.sender,
             proposition: proposition
         });
+        _timeLimits[id] = timeLimit;
         selectVote.push(_proposals[id]);
         return id;
     }
     function proposalById(uint256 id) public view returns(Proposal memory) {
         return _proposals[id];
     }
+
         function getProposals() public view returns(Proposal[] memory) {
         return  selectVote;
     }
-    function vote() public {}
+
+    function vote(uint256 id, Vote vote_) public {
+        require(_hasVoted[msg.sender][id] == false, "ComEth: Already voted");
+        require(_proposals[id].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
+        
+        if(block.timestamp > _proposals[id].createdAt + _timeLimits[id]) {
+            /*if(_proposals[id].nbYes > _proposals[id].nbNo) {
+                _proposals[id].status = Status.Approved;
+            } else {
+                _proposals[id].status = Status.Rejected;
+            }*/
+        } else {
+            /*if(vote_ == Vote.Yes) {
+                _proposals[id].nbYes += 1;
+            } else {
+                _proposals[id].nbNo += 1;
+            }*/
+            _hasVoted[msg.sender][id] = true;
+        }
+    }
 
     //paiement
     function proceedPaiement() external payable {}
