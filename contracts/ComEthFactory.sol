@@ -7,8 +7,6 @@ contract ComEthFactory {
     ComEth[] public comEthAddresses;
     event ComEthCreated(ComEth comEth);
 
-    address private _comEthOwner;
-
     constructor() {}
 
     function createComEth(address comEthOwner_) external {
