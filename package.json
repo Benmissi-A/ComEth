@@ -1,6 +1,6 @@
 {
-  "name": "hardhat-project-template",
-  "version": "1.0.0",
+  "name": "ComEth",
+  "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
@@ -24,5 +24,8 @@
     "prettier": "^2.3.1",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.6"
-  }
+  },
+  "description": "Decentralized comunity with Dao and wallet multisig",
+  "repository": "https://github.com/Benmissi-A/ComEth.git",
+  "author": "Benmissi-A LokiDieKatze GuillaumeB75 Stella Soler"
 }
