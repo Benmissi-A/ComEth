@@ -74,14 +74,12 @@ contract ComEth {
         bytes32 uuid_,
         string memory proposition
     ) public returns (uint256) {
-
         _id.increment();
-
         uint256 id = _id.current();
 
         _proposals[id] = Proposal({
-            Vote: vote_,
-            StatusVote: StatusVote.Running,
+            vote: vote_,
+            statusVote: StatusVote.Running,
             uuid: uuid_,
             createdAt: block.timestamp,
             author: msg.sender,
