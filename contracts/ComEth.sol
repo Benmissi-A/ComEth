@@ -5,10 +5,25 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 contract ComEth {
         using Address for address payable;
+        
+//types de votes
+    enum YesNo {
+        yes,
+        no,
+        blank
+    }
+
+    string[] public selectVote;
+
+    string private _stringVote;
+
+    uint256 private _numberVote;
 
     enum Vote {
-        Yes,
-        No
+        YesNo,
+        stringVote,
+        numberVote,
+        selectVote
     }
 
     enum StatusVote {
@@ -48,7 +63,7 @@ contract ComEth {
 
     //votes
     function submitProposal () public {
-
+        
     }
 
     function vote () public {
@@ -56,7 +71,7 @@ contract ComEth {
     }
 
     //paiement
-    function proceedPaiement () internal {
+    function proceedPaiement () external payable{
 
     }
 
@@ -71,13 +86,14 @@ contract ComEth {
     }
 
     //prison
-    function ban () internal {
+    function ban () public {
 
     }
 
-    function getIsBanned (address userAddress) public returns (bool) {
+    function getIsBanned (address userAddress) public view returns (bool) {
         return _users[userAddress].isBanned;
     }
+
     //fermeture de comEth
      
 }
