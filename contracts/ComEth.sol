@@ -2,9 +2,11 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract ComEth {
     using Address for address payable;
+    using Counters for Counters.Counter;
 
     //types de votes
     enum YesNo {
@@ -12,12 +14,6 @@ contract ComEth {
         no,
         blank
     }
-
-    string[] public selectVote;
-
-    string private _stringVote;
-
-    uint256 private _numberVote;
 
     enum Vote {
         YesNo,
@@ -46,12 +42,21 @@ contract ComEth {
         StatusVote statusVote;
         bytes32 uuid;
         uint256 createdAt;
+        address author;
         string proposition;
     }
 
     address private _comEthOwner;
     bool private _isActive;
     bool private _hasPaid;
+
+    string[] public selectVote;
+
+    string private _stringVote;
+
+    uint256 private _numberVote;
+
+    Counters.Counter private _id;
 
     mapping(address => User) private _users;
     mapping(uint256 => Proposal) private _proposals;
@@ -64,7 +69,26 @@ contract ComEth {
     receive() external payable {}
 
     //votes
-    function submitProposal() public {}
+    function submitProposal(
+        Vote vote_,
+        bytes32 uuid_,
+        string memory proposition
+    ) public returns (uint256) {
+
+        _id.increment();
+
+        uint256 id = _id.current();
+
+        _proposals[id] = Proposal({
+            Vote: vote_,
+            StatusVote: StatusVote.Running,
+            uuid: uuid_,
+            createdAt: block.timestamp,
+            author: msg.sender,
+            proposition: proposition
+        });
+        return id;
+    }
 
     function vote() public {}
 
