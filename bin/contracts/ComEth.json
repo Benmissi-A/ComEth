@@ -1,0 +1,1740 @@
+{
+    "contractName": "ComEth",
+    "abi": [
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "comEthOwner_",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "constructor"
+        },
+        {
+            "inputs": [],
+            "name": "ban",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "userAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "getIsBanned",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "proceedPaiement",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "name": "selectVote",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "submitProposal",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "vote",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "stateMutability": "payable",
+            "type": "receive"
+        }
+    ],
+    "metadata": "{\"compiler\":{\"version\":\"0.8.7+commit.e28d00a7\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"comEthOwner_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"ban\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddress\",\"type\":\"address\"}],\"name\":\"getIsBanned\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proceedPaiement\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"selectVote\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"submitProposal\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"vote\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/enima/dev/ComEth/contracts/ComEth.sol\":\"ComEth\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/enima/dev/ComEth/contracts/ComEth.sol\":{\"keccak256\":\"0xc32e20a46a39d2910c59e2036ed0dd6da45f92cc5143b7c098d434b989f51ee5\",\"license\":\"Unlicensed\",\"urls\":[\"bzz-raw://58a9d8a50db92ba4d4bc7d5d499ce67923ef089e2df247c16723b62bb8c62ccd\",\"dweb:/ipfs/QmRWuz3M3gqy2JL8nLhGMVeGDu2Y5me9xFrT637LdeVU14\"]},\"/home/enima/dev/ComEth/node_modules/@openzeppelin/contracts/utils/Address.sol\":{\"keccak256\":\"0x3b4820cac4f127869f6eb496c1d74fa6ac86ed24071e0f94742e6aef20e7252c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://23e1c7303c30a2ef9c9b3f861cda15c78e4c9697b4a7988f2bf7b21c392a02fb\",\"dweb:/ipfs/QmWQJh5MsXJZjSTzAs9n5gtrqWYgXwkBa6xfwD5KKGQgSC\"]}},\"version\":1}",
+    "bytecode": "608060405234801561001057600080fd5b5060405161034a38038061034a83398101604081905261002f91610054565b600380546001600160a01b0319166001600160a01b0392909216919091179055610084565b60006020828403121561006657600080fd5b81516001600160a01b038116811461007d57600080fd5b9392505050565b6102b7806100936000396000f3fe6080604052600436106100595760003560e01c8063632a9a5214610065578063c188390214610065578063d5d9ce9114610065578063d65a0ba914610074578063f4d53a05146100aa578063f5f4c037146100fa57600080fd5b3661006057005b600080fd5b34801561007157600080fd5b50005b34801561008057600080fd5b5061009461008f3660046101d8565b6100fc565b6040516100a191906101f1565b60405180910390f35b3480156100b657600080fd5b506100ea6100c53660046101a8565b6001600160a01b0316600090815260046020526040902054600160a01b900460ff1690565b60405190151581526020016100a1565b005b6000818154811061010c57600080fd5b90600052602060002001600091509050805461012790610246565b80601f016020809104026020016040519081016040528092919081815260200182805461015390610246565b80156101a05780601f10610175576101008083540402835291602001916101a0565b820191906000526020600020905b81548152906001019060200180831161018357829003601f168201915b505050505081565b6000602082840312156101ba57600080fd5b81356001600160a01b03811681146101d157600080fd5b9392505050565b6000602082840312156101ea57600080fd5b5035919050565b600060208083528351808285015260005b8181101561021e57858101830151858201604001528201610202565b81811115610230576000604083870101525b50601f01601f1916929092016040019392505050565b600181811c9082168061025a57607f821691505b6020821081141561027b57634e487b7160e01b600052602260045260246000fd5b5091905056fea26469706673582212203f0296a9fe31af037b63e997d59d48d5616b3fb77737d3359f8fbaf7284a13ce64736f6c63430008070033",
+    "deployedBytecode": "6080604052600436106100595760003560e01c8063632a9a5214610065578063c188390214610065578063d5d9ce9114610065578063d65a0ba914610074578063f4d53a05146100aa578063f5f4c037146100fa57600080fd5b3661006057005b600080fd5b34801561007157600080fd5b50005b34801561008057600080fd5b5061009461008f3660046101d8565b6100fc565b6040516100a191906101f1565b60405180910390f35b3480156100b657600080fd5b506100ea6100c53660046101a8565b6001600160a01b0316600090815260046020526040902054600160a01b900460ff1690565b60405190151581526020016100a1565b005b6000818154811061010c57600080fd5b90600052602060002001600091509050805461012790610246565b80601f016020809104026020016040519081016040528092919081815260200182805461015390610246565b80156101a05780601f10610175576101008083540402835291602001916101a0565b820191906000526020600020905b81548152906001019060200180831161018357829003601f168201915b505050505081565b6000602082840312156101ba57600080fd5b81356001600160a01b03811681146101d157600080fd5b9392505050565b6000602082840312156101ea57600080fd5b5035919050565b600060208083528351808285015260005b8181101561021e57858101830151858201604001528201610202565b81811115610230576000604083870101525b50601f01601f1916929092016040019392505050565b600181811c9082168061025a57607f821691505b6020821081141561027b57634e487b7160e01b600052602260045260246000fd5b5091905056fea26469706673582212203f0296a9fe31af037b63e997d59d48d5616b3fb77737d3359f8fbaf7284a13ce64736f6c63430008070033",
+    "sourceMap": "152:1750:0:-:0;;;1084:78;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;1128:12;:27;;-1:-1:-1;;;;;;1128:27:0;-1:-1:-1;;;;;1128:27:0;;;;;;;;;;152:1750;;14:290:2;84:6;137:2;125:9;116:7;112:23;108:32;105:52;;;153:1;150;143:12;105:52;179:16;;-1:-1:-1;;;;;224:31:2;;214:42;;204:70;;270:1;267;260:12;204:70;293:5;14:290;-1:-1:-1;;;14:290:2:o;:::-;152:1750:0;;;;;;",
+    "deployedSourceMap": "152:1750:0:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1273:25;;;;;;;;;;;;298:26;;;;;;;;;;-1:-1:-1;298:26:0;;;;;:::i;:::-;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;1752:121;;;;;;;;;;-1:-1:-1;1752:121:0;;;;;:::i;:::-;-1:-1:-1;;;;;1838:19:0;1815:4;1838:19;;;:6;:19;;;;;:28;-1:-1:-1;;;1838:28:0;;;;;1752:121;;;;655:14:2;;648:22;630:41;;618:2;603:18;1752:121:0;490:187:2;1319:46:0;1273:25;298:26;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;14:286:2:-;73:6;126:2;114:9;105:7;101:23;97:32;94:52;;;142:1;139;132:12;94:52;168:23;;-1:-1:-1;;;;;220:31:2;;210:42;;200:70;;266:1;263;256:12;200:70;289:5;14:286;-1:-1:-1;;;14:286:2:o;305:180::-;364:6;417:2;405:9;396:7;392:23;388:32;385:52;;;433:1;430;423:12;385:52;-1:-1:-1;456:23:2;;305:180;-1:-1:-1;305:180:2:o;682:597::-;794:4;823:2;852;841:9;834:21;884:6;878:13;927:6;922:2;911:9;907:18;900:34;952:1;962:140;976:6;973:1;970:13;962:140;;;1071:14;;;1067:23;;1061:30;1037:17;;;1056:2;1033:26;1026:66;991:10;;962:140;;;1120:6;1117:1;1114:13;1111:91;;;1190:1;1185:2;1176:6;1165:9;1161:22;1157:31;1150:42;1111:91;-1:-1:-1;1263:2:2;1242:15;-1:-1:-1;;1238:29:2;1223:45;;;;1270:2;1219:54;;682:597;-1:-1:-1;;;682:597:2:o;1284:380::-;1363:1;1359:12;;;;1406;;;1427:61;;1481:4;1473:6;1469:17;1459:27;;1427:61;1534:2;1526:6;1523:14;1503:18;1500:38;1497:161;;;1580:10;1575:3;1571:20;1568:1;1561:31;1615:4;1612:1;1605:15;1643:4;1640:1;1633:15;1497:161;;1284:380;;;:::o",
+    "sourcePath": "/home/enima/dev/ComEth/contracts/ComEth.sol",
+    "compiler": {
+        "name": "solc",
+        "version": "0.8.7+commit.e28d00a7"
+    },
+    "ast": {
+        "absolutePath": "/home/enima/dev/ComEth/contracts/ComEth.sol",
+        "exportedSymbols": {
+            "Address": [
+                442
+            ],
+            "ComEth": [
+                146
+            ]
+        },
+        "id": 147,
+        "license": "Unlicensed",
+        "nodeType": "SourceUnit",
+        "nodes": [
+            {
+                "id": 1,
+                "literals": [
+                    "solidity",
+                    "^",
+                    "0.8",
+                    ".0"
+                ],
+                "nodeType": "PragmaDirective",
+                "src": "38:23:0"
+            },
+            {
+                "absolutePath": "/home/enima/dev/ComEth/node_modules/@openzeppelin/contracts/utils/Address.sol",
+                "file": "/home/enima/dev/ComEth/node_modules/@openzeppelin/contracts/utils/Address.sol",
+                "id": 2,
+                "nameLocation": "-1:-1:-1",
+                "nodeType": "ImportDirective",
+                "scope": 147,
+                "sourceUnit": 443,
+                "src": "63:87:0",
+                "symbolAliases": [],
+                "unitAlias": ""
+            },
+            {
+                "abstract": false,
+                "baseContracts": [],
+                "contractDependencies": [],
+                "contractKind": "contract",
+                "fullyImplemented": true,
+                "id": 146,
+                "linearizedBaseContracts": [
+                    146
+                ],
+                "name": "ComEth",
+                "nameLocation": "161:6:0",
+                "nodeType": "ContractDefinition",
+                "nodes": [
+                    {
+                        "id": 5,
+                        "libraryName": {
+                            "id": 3,
+                            "name": "Address",
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 442,
+                            "src": "180:7:0"
+                        },
+                        "nodeType": "UsingForDirective",
+                        "src": "174:34:0",
+                        "typeName": {
+                            "id": 4,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "192:15:0",
+                            "stateMutability": "payable",
+                            "typeDescriptions": {
+                                "typeIdentifier": "t_address_payable",
+                                "typeString": "address payable"
+                            }
+                        }
+                    },
+                    {
+                        "canonicalName": "ComEth.YesNo",
+                        "id": 9,
+                        "members": [
+                            {
+                                "id": 6,
+                                "name": "yes",
+                                "nameLocation": "256:3:0",
+                                "nodeType": "EnumValue",
+                                "src": "256:3:0"
+                            },
+                            {
+                                "id": 7,
+                                "name": "no",
+                                "nameLocation": "269:2:0",
+                                "nodeType": "EnumValue",
+                                "src": "269:2:0"
+                            },
+                            {
+                                "id": 8,
+                                "name": "blank",
+                                "nameLocation": "281:5:0",
+                                "nodeType": "EnumValue",
+                                "src": "281:5:0"
+                            }
+                        ],
+                        "name": "YesNo",
+                        "nameLocation": "240:5:0",
+                        "nodeType": "EnumDefinition",
+                        "src": "235:57:0"
+                    },
+                    {
+                        "constant": false,
+                        "functionSelector": "d65a0ba9",
+                        "id": 12,
+                        "mutability": "mutable",
+                        "name": "selectVote",
+                        "nameLocation": "314:10:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 146,
+                        "src": "298:26:0",
+                        "stateVariable": true,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_string_storage_$dyn_storage",
+                            "typeString": "string[]"
+                        },
+                        "typeName": {
+                            "baseType": {
+                                "id": 10,
+                                "name": "string",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "298:6:0",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_string_storage_ptr",
+                                    "typeString": "string"
+                                }
+                            },
+                            "id": 11,
+                            "nodeType": "ArrayTypeName",
+                            "src": "298:8:0",
+                            "typeDescriptions": {
+                                "typeIdentifier": "t_array$_t_string_storage_$dyn_storage_ptr",
+                                "typeString": "string[]"
+                            }
+                        },
+                        "visibility": "public"
+                    },
+                    {
+                        "constant": false,
+                        "id": 14,
+                        "mutability": "mutable",
+                        "name": "_stringVote",
+                        "nameLocation": "346:11:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 146,
+                        "src": "331:26:0",
+                        "stateVariable": true,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                            "typeIdentifier": "t_string_storage",
+                            "typeString": "string"
+                        },
+                        "typeName": {
+                            "id": 13,
+                            "name": "string",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "331:6:0",
+                            "typeDescriptions": {
+                                "typeIdentifier": "t_string_storage_ptr",
+                                "typeString": "string"
+                            }
+                        },
+                        "visibility": "private"
+                    },
+                    {
+                        "constant": false,
+                        "id": 16,
+                        "mutability": "mutable",
+                        "name": "_numberVote",
+                        "nameLocation": "380:11:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 146,
+                        "src": "364:27:0",
+                        "stateVariable": true,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                        },
+                        "typeName": {
+                            "id": 15,
+                            "name": "uint256",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "364:7:0",
+                            "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                            }
+                        },
+                        "visibility": "private"
+                    },
+                    {
+                        "canonicalName": "ComEth.Vote",
+                        "id": 21,
+                        "members": [
+                            {
+                                "id": 17,
+                                "name": "YesNo",
+                                "nameLocation": "418:5:0",
+                                "nodeType": "EnumValue",
+                                "src": "418:5:0"
+                            },
+                            {
+                                "id": 18,
+                                "name": "stringVote",
+                                "nameLocation": "433:10:0",
+                                "nodeType": "EnumValue",
+                                "src": "433:10:0"
+                            },
+                            {
+                                "id": 19,
+                                "name": "numberVote",
+                                "nameLocation": "453:10:0",
+                                "nodeType": "EnumValue",
+                                "src": "453:10:0"
+                            },
+                            {
+                                "id": 20,
+                                "name": "selectVote",
+                                "nameLocation": "473:10:0",
+                                "nodeType": "EnumValue",
+                                "src": "473:10:0"
+                            }
+                        ],
+                        "name": "Vote",
+                        "nameLocation": "403:4:0",
+                        "nodeType": "EnumDefinition",
+                        "src": "398:91:0"
+                    },
+                    {
+                        "canonicalName": "ComEth.StatusVote",
+                        "id": 26,
+                        "members": [
+                            {
+                                "id": 22,
+                                "name": "Inactive",
+                                "nameLocation": "521:8:0",
+                                "nodeType": "EnumValue",
+                                "src": "521:8:0"
+                            },
+                            {
+                                "id": 23,
+                                "name": "Running",
+                                "nameLocation": "539:7:0",
+                                "nodeType": "EnumValue",
+                                "src": "539:7:0"
+                            },
+                            {
+                                "id": 24,
+                                "name": "Approved",
+                                "nameLocation": "556:8:0",
+                                "nodeType": "EnumValue",
+                                "src": "556:8:0"
+                            },
+                            {
+                                "id": 25,
+                                "name": "Rejected",
+                                "nameLocation": "574:8:0",
+                                "nodeType": "EnumValue",
+                                "src": "574:8:0"
+                            }
+                        ],
+                        "name": "StatusVote",
+                        "nameLocation": "500:10:0",
+                        "nodeType": "EnumDefinition",
+                        "src": "495:93:0"
+                    },
+                    {
+                        "canonicalName": "ComEth.User",
+                        "id": 37,
+                        "members": [
+                            {
+                                "constant": false,
+                                "id": 28,
+                                "mutability": "mutable",
+                                "name": "userAddress",
+                                "nameLocation": "624:11:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 37,
+                                "src": "616:19:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_address",
+                                    "typeString": "address"
+                                },
+                                "typeName": {
+                                    "id": 27,
+                                    "name": "address",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "616:7:0",
+                                    "stateMutability": "nonpayable",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    }
+                                },
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 30,
+                                "mutability": "mutable",
+                                "name": "isBanned",
+                                "nameLocation": "650:8:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 37,
+                                "src": "645:13:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bool",
+                                    "typeString": "bool"
+                                },
+                                "typeName": {
+                                    "id": 29,
+                                    "name": "bool",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "645:4:0",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bool",
+                                        "typeString": "bool"
+                                    }
+                                },
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 32,
+                                "mutability": "mutable",
+                                "name": "hasVoted",
+                                "nameLocation": "673:8:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 37,
+                                "src": "668:13:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bool",
+                                    "typeString": "bool"
+                                },
+                                "typeName": {
+                                    "id": 31,
+                                    "name": "bool",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "668:4:0",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bool",
+                                        "typeString": "bool"
+                                    }
+                                },
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 34,
+                                "mutability": "mutable",
+                                "name": "hasPaid",
+                                "nameLocation": "696:7:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 37,
+                                "src": "691:12:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bool",
+                                    "typeString": "bool"
+                                },
+                                "typeName": {
+                                    "id": 33,
+                                    "name": "bool",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "691:4:0",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bool",
+                                        "typeString": "bool"
+                                    }
+                                },
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 36,
+                                "mutability": "mutable",
+                                "name": "isActive",
+                                "nameLocation": "718:8:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 37,
+                                "src": "713:13:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bool",
+                                    "typeString": "bool"
+                                },
+                                "typeName": {
+                                    "id": 35,
+                                    "name": "bool",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "713:4:0",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bool",
+                                        "typeString": "bool"
+                                    }
+                                },
+                                "visibility": "internal"
+                            }
+                        ],
+                        "name": "User",
+                        "nameLocation": "601:4:0",
+                        "nodeType": "StructDefinition",
+                        "scope": 146,
+                        "src": "594:139:0",
+                        "visibility": "public"
+                    },
+                    {
+                        "canonicalName": "ComEth.Proposal",
+                        "id": 50,
+                        "members": [
+                            {
+                                "constant": false,
+                                "id": 40,
+                                "mutability": "mutable",
+                                "name": "vote",
+                                "nameLocation": "770:4:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 50,
+                                "src": "765:9:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_enum$_Vote_$21",
+                                    "typeString": "enum ComEth.Vote"
+                                },
+                                "typeName": {
+                                    "id": 39,
+                                    "nodeType": "UserDefinedTypeName",
+                                    "pathNode": {
+                                        "id": 38,
+                                        "name": "Vote",
+                                        "nodeType": "IdentifierPath",
+                                        "referencedDeclaration": 21,
+                                        "src": "765:4:0"
+                                    },
+                                    "referencedDeclaration": 21,
+                                    "src": "765:4:0",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_enum$_Vote_$21",
+                                        "typeString": "enum ComEth.Vote"
+                                    }
+                                },
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 43,
+                                "mutability": "mutable",
+                                "name": "statusVote",
+                                "nameLocation": "795:10:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 50,
+                                "src": "784:21:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_enum$_StatusVote_$26",
+                                    "typeString": "enum ComEth.StatusVote"
+                                },
+                                "typeName": {
+                                    "id": 42,
+                                    "nodeType": "UserDefinedTypeName",
+                                    "pathNode": {
+                                        "id": 41,
+                                        "name": "StatusVote",
+                                        "nodeType": "IdentifierPath",
+                                        "referencedDeclaration": 26,
+                                        "src": "784:10:0"
+                                    },
+                                    "referencedDeclaration": 26,
+                                    "src": "784:10:0",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_enum$_StatusVote_$26",
+                                        "typeString": "enum ComEth.StatusVote"
+                                    }
+                                },
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 45,
+                                "mutability": "mutable",
+                                "name": "uuid",
+                                "nameLocation": "823:4:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 50,
+                                "src": "815:12:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes32",
+                                    "typeString": "bytes32"
+                                },
+                                "typeName": {
+                                    "id": 44,
+                                    "name": "bytes32",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "815:7:0",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    }
+                                },
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 47,
+                                "mutability": "mutable",
+                                "name": "createdAt",
+                                "nameLocation": "845:9:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 50,
+                                "src": "837:17:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_uint256",
+                                    "typeString": "uint256"
+                                },
+                                "typeName": {
+                                    "id": 46,
+                                    "name": "uint256",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "837:7:0",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint256",
+                                        "typeString": "uint256"
+                                    }
+                                },
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 49,
+                                "mutability": "mutable",
+                                "name": "proposition",
+                                "nameLocation": "871:11:0",
+                                "nodeType": "VariableDeclaration",
+                                "scope": 50,
+                                "src": "864:18:0",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_string_storage_ptr",
+                                    "typeString": "string"
+                                },
+                                "typeName": {
+                                    "id": 48,
+                                    "name": "string",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "864:6:0",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_string_storage_ptr",
+                                        "typeString": "string"
+                                    }
+                                },
+                                "visibility": "internal"
+                            }
+                        ],
+                        "name": "Proposal",
+                        "nameLocation": "746:8:0",
+                        "nodeType": "StructDefinition",
+                        "scope": 146,
+                        "src": "739:150:0",
+                        "visibility": "public"
+                    },
+                    {
+                        "constant": false,
+                        "id": 52,
+                        "mutability": "mutable",
+                        "name": "_comEthOwner",
+                        "nameLocation": "911:12:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 146,
+                        "src": "895:28:0",
+                        "stateVariable": true,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                        },
+                        "typeName": {
+                            "id": 51,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "895:7:0",
+                            "stateMutability": "nonpayable",
+                            "typeDescriptions": {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                            }
+                        },
+                        "visibility": "private"
+                    },
+                    {
+                        "constant": false,
+                        "id": 54,
+                        "mutability": "mutable",
+                        "name": "_isActive",
+                        "nameLocation": "942:9:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 146,
+                        "src": "929:22:0",
+                        "stateVariable": true,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                        },
+                        "typeName": {
+                            "id": 53,
+                            "name": "bool",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "929:4:0",
+                            "typeDescriptions": {
+                                "typeIdentifier": "t_bool",
+                                "typeString": "bool"
+                            }
+                        },
+                        "visibility": "private"
+                    },
+                    {
+                        "constant": false,
+                        "id": 56,
+                        "mutability": "mutable",
+                        "name": "_hasPaid",
+                        "nameLocation": "970:8:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 146,
+                        "src": "957:21:0",
+                        "stateVariable": true,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                        },
+                        "typeName": {
+                            "id": 55,
+                            "name": "bool",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "957:4:0",
+                            "typeDescriptions": {
+                                "typeIdentifier": "t_bool",
+                                "typeString": "bool"
+                            }
+                        },
+                        "visibility": "private"
+                    },
+                    {
+                        "constant": false,
+                        "id": 61,
+                        "mutability": "mutable",
+                        "name": "_users",
+                        "nameLocation": "1018:6:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 146,
+                        "src": "985:39:0",
+                        "stateVariable": true,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_User_$37_storage_$",
+                            "typeString": "mapping(address => struct ComEth.User)"
+                        },
+                        "typeName": {
+                            "id": 60,
+                            "keyType": {
+                                "id": 57,
+                                "name": "address",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "993:7:0",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_address",
+                                    "typeString": "address"
+                                }
+                            },
+                            "nodeType": "Mapping",
+                            "src": "985:24:0",
+                            "typeDescriptions": {
+                                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_User_$37_storage_$",
+                                "typeString": "mapping(address => struct ComEth.User)"
+                            },
+                            "valueType": {
+                                "id": 59,
+                                "nodeType": "UserDefinedTypeName",
+                                "pathNode": {
+                                    "id": 58,
+                                    "name": "User",
+                                    "nodeType": "IdentifierPath",
+                                    "referencedDeclaration": 37,
+                                    "src": "1004:4:0"
+                                },
+                                "referencedDeclaration": 37,
+                                "src": "1004:4:0",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_struct$_User_$37_storage_ptr",
+                                    "typeString": "struct ComEth.User"
+                                }
+                            }
+                        },
+                        "visibility": "private"
+                    },
+                    {
+                        "constant": false,
+                        "id": 66,
+                        "mutability": "mutable",
+                        "name": "_proposals",
+                        "nameLocation": "1067:10:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 146,
+                        "src": "1030:47:0",
+                        "stateVariable": true,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Proposal_$50_storage_$",
+                            "typeString": "mapping(uint256 => struct ComEth.Proposal)"
+                        },
+                        "typeName": {
+                            "id": 65,
+                            "keyType": {
+                                "id": 62,
+                                "name": "uint256",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "1038:7:0",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_uint256",
+                                    "typeString": "uint256"
+                                }
+                            },
+                            "nodeType": "Mapping",
+                            "src": "1030:28:0",
+                            "typeDescriptions": {
+                                "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Proposal_$50_storage_$",
+                                "typeString": "mapping(uint256 => struct ComEth.Proposal)"
+                            },
+                            "valueType": {
+                                "id": 64,
+                                "nodeType": "UserDefinedTypeName",
+                                "pathNode": {
+                                    "id": 63,
+                                    "name": "Proposal",
+                                    "nodeType": "IdentifierPath",
+                                    "referencedDeclaration": 50,
+                                    "src": "1049:8:0"
+                                },
+                                "referencedDeclaration": 50,
+                                "src": "1049:8:0",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_struct$_Proposal_$50_storage_ptr",
+                                    "typeString": "struct ComEth.Proposal"
+                                }
+                            }
+                        },
+                        "visibility": "private"
+                    },
+                    {
+                        "body": {
+                            "id": 75,
+                            "nodeType": "Block",
+                            "src": "1118:44:0",
+                            "statements": [
+                                {
+                                    "expression": {
+                                        "id": 73,
+                                        "isConstant": false,
+                                        "isLValue": false,
+                                        "isPure": false,
+                                        "lValueRequested": false,
+                                        "leftHandSide": {
+                                            "id": 71,
+                                            "name": "_comEthOwner",
+                                            "nodeType": "Identifier",
+                                            "overloadedDeclarations": [],
+                                            "referencedDeclaration": 52,
+                                            "src": "1128:12:0",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_address",
+                                                "typeString": "address"
+                                            }
+                                        },
+                                        "nodeType": "Assignment",
+                                        "operator": "=",
+                                        "rightHandSide": {
+                                            "id": 72,
+                                            "name": "comEthOwner_",
+                                            "nodeType": "Identifier",
+                                            "overloadedDeclarations": [],
+                                            "referencedDeclaration": 68,
+                                            "src": "1143:12:0",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_address",
+                                                "typeString": "address"
+                                            }
+                                        },
+                                        "src": "1128:27:0",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                        }
+                                    },
+                                    "id": 74,
+                                    "nodeType": "ExpressionStatement",
+                                    "src": "1128:27:0"
+                                }
+                            ]
+                        },
+                        "id": 76,
+                        "implemented": true,
+                        "kind": "constructor",
+                        "modifiers": [],
+                        "name": "",
+                        "nameLocation": "-1:-1:-1",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 69,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 68,
+                                    "mutability": "mutable",
+                                    "name": "comEthOwner_",
+                                    "nameLocation": "1104:12:0",
+                                    "nodeType": "VariableDeclaration",
+                                    "scope": 76,
+                                    "src": "1096:20:0",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    },
+                                    "typeName": {
+                                        "id": 67,
+                                        "name": "address",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "1096:7:0",
+                                        "stateMutability": "nonpayable",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                        }
+                                    },
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "1095:22:0"
+                        },
+                        "returnParameters": {
+                            "id": 70,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1118:0:0"
+                        },
+                        "scope": 146,
+                        "src": "1084:78:0",
+                        "stateMutability": "nonpayable",
+                        "virtual": false,
+                        "visibility": "public"
+                    },
+                    {
+                        "body": {
+                            "id": 79,
+                            "nodeType": "Block",
+                            "src": "1212:2:0",
+                            "statements": []
+                        },
+                        "id": 80,
+                        "implemented": true,
+                        "kind": "receive",
+                        "modifiers": [],
+                        "name": "",
+                        "nameLocation": "-1:-1:-1",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 77,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1192:2:0"
+                        },
+                        "returnParameters": {
+                            "id": 78,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1212:0:0"
+                        },
+                        "scope": 146,
+                        "src": "1185:29:0",
+                        "stateMutability": "payable",
+                        "virtual": false,
+                        "visibility": "external"
+                    },
+                    {
+                        "body": {
+                            "id": 83,
+                            "nodeType": "Block",
+                            "src": "1265:2:0",
+                            "statements": []
+                        },
+                        "functionSelector": "c1883902",
+                        "id": 84,
+                        "implemented": true,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "submitProposal",
+                        "nameLocation": "1241:14:0",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 81,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1255:2:0"
+                        },
+                        "returnParameters": {
+                            "id": 82,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1265:0:0"
+                        },
+                        "scope": 146,
+                        "src": "1232:35:0",
+                        "stateMutability": "nonpayable",
+                        "virtual": false,
+                        "visibility": "public"
+                    },
+                    {
+                        "body": {
+                            "id": 87,
+                            "nodeType": "Block",
+                            "src": "1296:2:0",
+                            "statements": []
+                        },
+                        "functionSelector": "632a9a52",
+                        "id": 88,
+                        "implemented": true,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "vote",
+                        "nameLocation": "1282:4:0",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 85,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1286:2:0"
+                        },
+                        "returnParameters": {
+                            "id": 86,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1296:0:0"
+                        },
+                        "scope": 146,
+                        "src": "1273:25:0",
+                        "stateMutability": "nonpayable",
+                        "virtual": false,
+                        "visibility": "public"
+                    },
+                    {
+                        "body": {
+                            "id": 91,
+                            "nodeType": "Block",
+                            "src": "1363:2:0",
+                            "statements": []
+                        },
+                        "functionSelector": "f5f4c037",
+                        "id": 92,
+                        "implemented": true,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "proceedPaiement",
+                        "nameLocation": "1328:15:0",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 89,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1343:2:0"
+                        },
+                        "returnParameters": {
+                            "id": 90,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1363:0:0"
+                        },
+                        "scope": 146,
+                        "src": "1319:46:0",
+                        "stateMutability": "payable",
+                        "virtual": false,
+                        "visibility": "external"
+                    },
+                    {
+                        "body": {
+                            "id": 127,
+                            "nodeType": "Block",
+                            "src": "1473:230:0",
+                            "statements": [
+                                {
+                                    "condition": {
+                                        "id": 104,
+                                        "isConstant": false,
+                                        "isLValue": false,
+                                        "isPure": false,
+                                        "lValueRequested": false,
+                                        "leftHandSide": {
+                                            "expression": {
+                                                "baseExpression": {
+                                                    "id": 99,
+                                                    "name": "_users",
+                                                    "nodeType": "Identifier",
+                                                    "overloadedDeclarations": [],
+                                                    "referencedDeclaration": 61,
+                                                    "src": "1487:6:0",
+                                                    "typeDescriptions": {
+                                                        "typeIdentifier": "t_mapping$_t_address_$_t_struct$_User_$37_storage_$",
+                                                        "typeString": "mapping(address => struct ComEth.User storage ref)"
+                                                    }
+                                                },
+                                                "id": 101,
+                                                "indexExpression": {
+                                                    "id": 100,
+                                                    "name": "userAddress",
+                                                    "nodeType": "Identifier",
+                                                    "overloadedDeclarations": [],
+                                                    "referencedDeclaration": 94,
+                                                    "src": "1494:11:0",
+                                                    "typeDescriptions": {
+                                                        "typeIdentifier": "t_address",
+                                                        "typeString": "address"
+                                                    }
+                                                },
+                                                "isConstant": false,
+                                                "isLValue": true,
+                                                "isPure": false,
+                                                "lValueRequested": false,
+                                                "nodeType": "IndexAccess",
+                                                "src": "1487:19:0",
+                                                "typeDescriptions": {
+                                                    "typeIdentifier": "t_struct$_User_$37_storage",
+                                                    "typeString": "struct ComEth.User storage ref"
+                                                }
+                                            },
+                                            "id": 102,
+                                            "isConstant": false,
+                                            "isLValue": true,
+                                            "isPure": false,
+                                            "lValueRequested": true,
+                                            "memberName": "isActive",
+                                            "nodeType": "MemberAccess",
+                                            "referencedDeclaration": 36,
+                                            "src": "1487:28:0",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_bool",
+                                                "typeString": "bool"
+                                            }
+                                        },
+                                        "nodeType": "Assignment",
+                                        "operator": "=",
+                                        "rightHandSide": {
+                                            "hexValue": "66616c7365",
+                                            "id": 103,
+                                            "isConstant": false,
+                                            "isLValue": false,
+                                            "isPure": true,
+                                            "kind": "bool",
+                                            "lValueRequested": false,
+                                            "nodeType": "Literal",
+                                            "src": "1518:5:0",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_bool",
+                                                "typeString": "bool"
+                                            },
+                                            "value": "false"
+                                        },
+                                        "src": "1487:36:0",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bool",
+                                            "typeString": "bool"
+                                        }
+                                    },
+                                    "falseBody": {
+                                        "id": 120,
+                                        "nodeType": "Block",
+                                        "src": "1591:61:0",
+                                        "statements": [
+                                            {
+                                                "expression": {
+                                                    "id": 118,
+                                                    "isConstant": false,
+                                                    "isLValue": false,
+                                                    "isPure": false,
+                                                    "lValueRequested": false,
+                                                    "leftHandSide": {
+                                                        "expression": {
+                                                            "baseExpression": {
+                                                                "id": 113,
+                                                                "name": "_users",
+                                                                "nodeType": "Identifier",
+                                                                "overloadedDeclarations": [],
+                                                                "referencedDeclaration": 61,
+                                                                "src": "1605:6:0",
+                                                                "typeDescriptions": {
+                                                                    "typeIdentifier": "t_mapping$_t_address_$_t_struct$_User_$37_storage_$",
+                                                                    "typeString": "mapping(address => struct ComEth.User storage ref)"
+                                                                }
+                                                            },
+                                                            "id": 115,
+                                                            "indexExpression": {
+                                                                "id": 114,
+                                                                "name": "userAddress",
+                                                                "nodeType": "Identifier",
+                                                                "overloadedDeclarations": [],
+                                                                "referencedDeclaration": 94,
+                                                                "src": "1612:11:0",
+                                                                "typeDescriptions": {
+                                                                    "typeIdentifier": "t_address",
+                                                                    "typeString": "address"
+                                                                }
+                                                            },
+                                                            "isConstant": false,
+                                                            "isLValue": true,
+                                                            "isPure": false,
+                                                            "lValueRequested": false,
+                                                            "nodeType": "IndexAccess",
+                                                            "src": "1605:19:0",
+                                                            "typeDescriptions": {
+                                                                "typeIdentifier": "t_struct$_User_$37_storage",
+                                                                "typeString": "struct ComEth.User storage ref"
+                                                            }
+                                                        },
+                                                        "id": 116,
+                                                        "isConstant": false,
+                                                        "isLValue": true,
+                                                        "isPure": false,
+                                                        "lValueRequested": true,
+                                                        "memberName": "isActive",
+                                                        "nodeType": "MemberAccess",
+                                                        "referencedDeclaration": 36,
+                                                        "src": "1605:28:0",
+                                                        "typeDescriptions": {
+                                                            "typeIdentifier": "t_bool",
+                                                            "typeString": "bool"
+                                                        }
+                                                    },
+                                                    "nodeType": "Assignment",
+                                                    "operator": "=",
+                                                    "rightHandSide": {
+                                                        "hexValue": "66616c7365",
+                                                        "id": 117,
+                                                        "isConstant": false,
+                                                        "isLValue": false,
+                                                        "isPure": true,
+                                                        "kind": "bool",
+                                                        "lValueRequested": false,
+                                                        "nodeType": "Literal",
+                                                        "src": "1636:5:0",
+                                                        "typeDescriptions": {
+                                                            "typeIdentifier": "t_bool",
+                                                            "typeString": "bool"
+                                                        },
+                                                        "value": "false"
+                                                    },
+                                                    "src": "1605:36:0",
+                                                    "typeDescriptions": {
+                                                        "typeIdentifier": "t_bool",
+                                                        "typeString": "bool"
+                                                    }
+                                                },
+                                                "id": 119,
+                                                "nodeType": "ExpressionStatement",
+                                                "src": "1605:36:0"
+                                            }
+                                        ]
+                                    },
+                                    "id": 121,
+                                    "nodeType": "IfStatement",
+                                    "src": "1483:169:0",
+                                    "trueBody": {
+                                        "id": 112,
+                                        "nodeType": "Block",
+                                        "src": "1525:60:0",
+                                        "statements": [
+                                            {
+                                                "expression": {
+                                                    "id": 110,
+                                                    "isConstant": false,
+                                                    "isLValue": false,
+                                                    "isPure": false,
+                                                    "lValueRequested": false,
+                                                    "leftHandSide": {
+                                                        "expression": {
+                                                            "baseExpression": {
+                                                                "id": 105,
+                                                                "name": "_users",
+                                                                "nodeType": "Identifier",
+                                                                "overloadedDeclarations": [],
+                                                                "referencedDeclaration": 61,
+                                                                "src": "1539:6:0",
+                                                                "typeDescriptions": {
+                                                                    "typeIdentifier": "t_mapping$_t_address_$_t_struct$_User_$37_storage_$",
+                                                                    "typeString": "mapping(address => struct ComEth.User storage ref)"
+                                                                }
+                                                            },
+                                                            "id": 107,
+                                                            "indexExpression": {
+                                                                "id": 106,
+                                                                "name": "userAddress",
+                                                                "nodeType": "Identifier",
+                                                                "overloadedDeclarations": [],
+                                                                "referencedDeclaration": 94,
+                                                                "src": "1546:11:0",
+                                                                "typeDescriptions": {
+                                                                    "typeIdentifier": "t_address",
+                                                                    "typeString": "address"
+                                                                }
+                                                            },
+                                                            "isConstant": false,
+                                                            "isLValue": true,
+                                                            "isPure": false,
+                                                            "lValueRequested": false,
+                                                            "nodeType": "IndexAccess",
+                                                            "src": "1539:19:0",
+                                                            "typeDescriptions": {
+                                                                "typeIdentifier": "t_struct$_User_$37_storage",
+                                                                "typeString": "struct ComEth.User storage ref"
+                                                            }
+                                                        },
+                                                        "id": 108,
+                                                        "isConstant": false,
+                                                        "isLValue": true,
+                                                        "isPure": false,
+                                                        "lValueRequested": true,
+                                                        "memberName": "isActive",
+                                                        "nodeType": "MemberAccess",
+                                                        "referencedDeclaration": 36,
+                                                        "src": "1539:28:0",
+                                                        "typeDescriptions": {
+                                                            "typeIdentifier": "t_bool",
+                                                            "typeString": "bool"
+                                                        }
+                                                    },
+                                                    "nodeType": "Assignment",
+                                                    "operator": "=",
+                                                    "rightHandSide": {
+                                                        "hexValue": "74727565",
+                                                        "id": 109,
+                                                        "isConstant": false,
+                                                        "isLValue": false,
+                                                        "isPure": true,
+                                                        "kind": "bool",
+                                                        "lValueRequested": false,
+                                                        "nodeType": "Literal",
+                                                        "src": "1570:4:0",
+                                                        "typeDescriptions": {
+                                                            "typeIdentifier": "t_bool",
+                                                            "typeString": "bool"
+                                                        },
+                                                        "value": "true"
+                                                    },
+                                                    "src": "1539:35:0",
+                                                    "typeDescriptions": {
+                                                        "typeIdentifier": "t_bool",
+                                                        "typeString": "bool"
+                                                    }
+                                                },
+                                                "id": 111,
+                                                "nodeType": "ExpressionStatement",
+                                                "src": "1539:35:0"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "expression": {
+                                        "expression": {
+                                            "baseExpression": {
+                                                "id": 122,
+                                                "name": "_users",
+                                                "nodeType": "Identifier",
+                                                "overloadedDeclarations": [],
+                                                "referencedDeclaration": 61,
+                                                "src": "1668:6:0",
+                                                "typeDescriptions": {
+                                                    "typeIdentifier": "t_mapping$_t_address_$_t_struct$_User_$37_storage_$",
+                                                    "typeString": "mapping(address => struct ComEth.User storage ref)"
+                                                }
+                                            },
+                                            "id": 124,
+                                            "indexExpression": {
+                                                "id": 123,
+                                                "name": "userAddress",
+                                                "nodeType": "Identifier",
+                                                "overloadedDeclarations": [],
+                                                "referencedDeclaration": 94,
+                                                "src": "1675:11:0",
+                                                "typeDescriptions": {
+                                                    "typeIdentifier": "t_address",
+                                                    "typeString": "address"
+                                                }
+                                            },
+                                            "isConstant": false,
+                                            "isLValue": true,
+                                            "isPure": false,
+                                            "lValueRequested": false,
+                                            "nodeType": "IndexAccess",
+                                            "src": "1668:19:0",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_User_$37_storage",
+                                                "typeString": "struct ComEth.User storage ref"
+                                            }
+                                        },
+                                        "id": 125,
+                                        "isConstant": false,
+                                        "isLValue": true,
+                                        "isPure": false,
+                                        "lValueRequested": false,
+                                        "memberName": "isActive",
+                                        "nodeType": "MemberAccess",
+                                        "referencedDeclaration": 36,
+                                        "src": "1668:28:0",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bool",
+                                            "typeString": "bool"
+                                        }
+                                    },
+                                    "functionReturnParameters": 98,
+                                    "id": 126,
+                                    "nodeType": "Return",
+                                    "src": "1661:35:0"
+                                }
+                            ]
+                        },
+                        "id": 128,
+                        "implemented": true,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "_toggleIsActive",
+                        "nameLocation": "1413:15:0",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 95,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 94,
+                                    "mutability": "mutable",
+                                    "name": "userAddress",
+                                    "nameLocation": "1437:11:0",
+                                    "nodeType": "VariableDeclaration",
+                                    "scope": 128,
+                                    "src": "1429:19:0",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    },
+                                    "typeName": {
+                                        "id": 93,
+                                        "name": "address",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "1429:7:0",
+                                        "stateMutability": "nonpayable",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                        }
+                                    },
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "1428:21:0"
+                        },
+                        "returnParameters": {
+                            "id": 98,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 97,
+                                    "mutability": "mutable",
+                                    "name": "",
+                                    "nameLocation": "-1:-1:-1",
+                                    "nodeType": "VariableDeclaration",
+                                    "scope": 128,
+                                    "src": "1467:4:0",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bool",
+                                        "typeString": "bool"
+                                    },
+                                    "typeName": {
+                                        "id": 96,
+                                        "name": "bool",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "1467:4:0",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bool",
+                                            "typeString": "bool"
+                                        }
+                                    },
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "1466:6:0"
+                        },
+                        "scope": 146,
+                        "src": "1404:299:0",
+                        "stateMutability": "nonpayable",
+                        "virtual": false,
+                        "visibility": "private"
+                    },
+                    {
+                        "body": {
+                            "id": 131,
+                            "nodeType": "Block",
+                            "src": "1744:2:0",
+                            "statements": []
+                        },
+                        "functionSelector": "d5d9ce91",
+                        "id": 132,
+                        "implemented": true,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "ban",
+                        "nameLocation": "1731:3:0",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 129,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1734:2:0"
+                        },
+                        "returnParameters": {
+                            "id": 130,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "1744:0:0"
+                        },
+                        "scope": 146,
+                        "src": "1722:24:0",
+                        "stateMutability": "nonpayable",
+                        "virtual": false,
+                        "visibility": "public"
+                    },
+                    {
+                        "body": {
+                            "id": 144,
+                            "nodeType": "Block",
+                            "src": "1821:52:0",
+                            "statements": [
+                                {
+                                    "expression": {
+                                        "expression": {
+                                            "baseExpression": {
+                                                "id": 139,
+                                                "name": "_users",
+                                                "nodeType": "Identifier",
+                                                "overloadedDeclarations": [],
+                                                "referencedDeclaration": 61,
+                                                "src": "1838:6:0",
+                                                "typeDescriptions": {
+                                                    "typeIdentifier": "t_mapping$_t_address_$_t_struct$_User_$37_storage_$",
+                                                    "typeString": "mapping(address => struct ComEth.User storage ref)"
+                                                }
+                                            },
+                                            "id": 141,
+                                            "indexExpression": {
+                                                "id": 140,
+                                                "name": "userAddress",
+                                                "nodeType": "Identifier",
+                                                "overloadedDeclarations": [],
+                                                "referencedDeclaration": 134,
+                                                "src": "1845:11:0",
+                                                "typeDescriptions": {
+                                                    "typeIdentifier": "t_address",
+                                                    "typeString": "address"
+                                                }
+                                            },
+                                            "isConstant": false,
+                                            "isLValue": true,
+                                            "isPure": false,
+                                            "lValueRequested": false,
+                                            "nodeType": "IndexAccess",
+                                            "src": "1838:19:0",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_User_$37_storage",
+                                                "typeString": "struct ComEth.User storage ref"
+                                            }
+                                        },
+                                        "id": 142,
+                                        "isConstant": false,
+                                        "isLValue": true,
+                                        "isPure": false,
+                                        "lValueRequested": false,
+                                        "memberName": "isBanned",
+                                        "nodeType": "MemberAccess",
+                                        "referencedDeclaration": 30,
+                                        "src": "1838:28:0",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bool",
+                                            "typeString": "bool"
+                                        }
+                                    },
+                                    "functionReturnParameters": 138,
+                                    "id": 143,
+                                    "nodeType": "Return",
+                                    "src": "1831:35:0"
+                                }
+                            ]
+                        },
+                        "functionSelector": "f4d53a05",
+                        "id": 145,
+                        "implemented": true,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "getIsBanned",
+                        "nameLocation": "1761:11:0",
+                        "nodeType": "FunctionDefinition",
+                        "parameters": {
+                            "id": 135,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 134,
+                                    "mutability": "mutable",
+                                    "name": "userAddress",
+                                    "nameLocation": "1781:11:0",
+                                    "nodeType": "VariableDeclaration",
+                                    "scope": 145,
+                                    "src": "1773:19:0",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    },
+                                    "typeName": {
+                                        "id": 133,
+                                        "name": "address",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "1773:7:0",
+                                        "stateMutability": "nonpayable",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                        }
+                                    },
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "1772:21:0"
+                        },
+                        "returnParameters": {
+                            "id": 138,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 137,
+                                    "mutability": "mutable",
+                                    "name": "",
+                                    "nameLocation": "-1:-1:-1",
+                                    "nodeType": "VariableDeclaration",
+                                    "scope": 145,
+                                    "src": "1815:4:0",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bool",
+                                        "typeString": "bool"
+                                    },
+                                    "typeName": {
+                                        "id": 136,
+                                        "name": "bool",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "1815:4:0",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bool",
+                                            "typeString": "bool"
+                                        }
+                                    },
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "1814:6:0"
+                        },
+                        "scope": 146,
+                        "src": "1752:121:0",
+                        "stateMutability": "view",
+                        "virtual": false,
+                        "visibility": "public"
+                    }
+                ],
+                "scope": 147,
+                "src": "152:1750:0",
+                "usedErrors": []
+            }
+        ],
+        "src": "38:1865:0"
+    },
+    "functionHashes": {
+        "ban()": "d5d9ce91",
+        "getIsBanned(address)": "f4d53a05",
+        "proceedPaiement()": "f5f4c037",
+        "selectVote(uint256)": "d65a0ba9",
+        "submitProposal()": "c1883902",
+        "vote()": "632a9a52"
+    },
+    "gasEstimates": {
+        "creation": {
+            "codeDepositCost": "139000",
+            "executionCost": "infinite",
+            "totalCost": "infinite"
+        },
+        "external": {
+            "ban()": "145",
+            "getIsBanned(address)": "2597",
+            "proceedPaiement()": "184",
+            "selectVote(uint256)": "infinite",
+            "submitProposal()": "123",
+            "vote()": "101"
+        },
+        "internal": {
+            "_toggleIsActive(address)": "infinite"
+        }
+    }
+}
