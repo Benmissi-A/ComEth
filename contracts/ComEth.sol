@@ -49,6 +49,7 @@ contract ComEth {
     bool private _hasPaid;
 
     Proposal[] public selectVote;
+    Users[] public nbUsers;
 
     string private _stringVote;
 
@@ -60,6 +61,7 @@ contract ComEth {
     mapping(uint256 => Proposal) private _proposals;
     mapping(address => mapping(uint256 => bool)) private _hasVoted;
     mapping(uint256 => uint256) private _timeLimits;
+    mapping(uint256 => uint256) private _nbVotes;
 
     constructor(address comEthOwner_) {
         _comEthOwner = comEthOwner_;
@@ -106,12 +108,16 @@ contract ComEth {
                 _proposals[id].status = Status.Rejected;
             }*/
         } else {
-            /*if(vote_ == Vote.Yes) {
+            if(vote_ == Vote.Yes) {
                 _proposals[id].nbYes += 1;
             } else {
                 _proposals[id].nbNo += 1;
-            }*/
+            }
             _hasVoted[msg.sender][id] = true;
+            _nbVotes[id] += 1;
+            if(nbUsers.length = _nbVotes[id]) {
+                //resolve vote
+            }
         }
     }
 
