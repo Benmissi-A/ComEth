@@ -74,7 +74,6 @@ contract ComEth {
     ) public returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
-
         _proposals[id] = Proposal({
             vote: vote_,
             statusVote: StatusVote.Running,
@@ -82,9 +81,15 @@ contract ComEth {
             author: msg.sender,
             proposition: proposition
         });
+        selectVote.push(_proposals[id]);
         return id;
     }
-
+    function proposalById(uint256 id) public view returns(Proposal memory) {
+        return _proposals[id];
+    }
+        function getProposals() public view returns(Proposal[] memory) {
+        return  selectVote;
+    }
     function vote() public {}
 
     //paiement
