@@ -27,5 +27,8 @@
   },
   "description": "Decentralized comunity with Dao and wallet multisig",
   "repository": "https://github.com/Benmissi-A/ComEth.git",
-  "author": "Benmissi-A LokiDieKatze GuillaumeB75 Stella Soler"
+  "author": "Benmissi-A LokiDieKatze GuillaumeB75 Stella Soler",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.2.0"
+  }
 }
