@@ -70,7 +70,6 @@ contract ComEth {
     //votes
     function submitProposal(
         Vote vote_,
-        bytes32 uuid_,
         string memory proposition
     ) public returns (uint256) {
         _id.increment();
