@@ -17,7 +17,7 @@ async function main() {
 
   // We get the contract to deploy
   const ComEthFactory = await hre.ethers.getContractFactory('ComEthFactory');
-  const comEthFactory = await ComEthFactory.deploy();
+  const comEthFactory = await ComEthFactory.deploy(deployer.address);
 
   // Attendre que le contrat soit réellement déployé, cad que la transaction de déploiement
   // soit incluse dans un bloc

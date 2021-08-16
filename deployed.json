@@ -1,4 +1,1 @@
-{
-  "ComEthFactory": { "rinkeby": { "address": "0xDC5822c171331e85A304e045E9a7a7584fCf1B61" } },
-  "ComEthToken": { "rinkeby": { "address": "0x54F80B7979A3F3Cf59A993DDF8b02b5627bf5300" } }
-}
+{"ComEthFactory":{"rinkeby":{"address":"0xD1cFcDdD7cdC67daDBa971800b51e90eAd4e6295"}},"ComEthToken":{"rinkeby":{"address":"0x54F80B7979A3F3Cf59A993DDF8b02b5627bf5300"}}}

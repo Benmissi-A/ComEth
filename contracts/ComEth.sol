@@ -50,7 +50,7 @@ contract ComEth {
     bool private _isActive;
     bool private _hasPaid;
 
-    string[] public selectVote;
+    Proposal[] public selectVote;
 
     string private _stringVote;
 
