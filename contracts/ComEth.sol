@@ -29,7 +29,7 @@ contract ComEth {
     struct Proposal {
         string[] voteOptions;
         // comptabilisation votes
-        uint256[] voteCount; 
+        uint256[voteOptions.length] voteCount; 
         StatusVote statusVote;
         uint256 createdAt;
         address author;
@@ -69,11 +69,7 @@ contract ComEth {
     ) public returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
-        uint256[5] memory arrayTemp_;
-
-        for( uint256 i = 0 ; i< voteOptions_.length ; i++){
-            
-        }
+        uint256[2] memory arrayTemp_;
 
         _proposals[id] = Proposal({
             voteOptions: voteOptions_,
