@@ -7,10 +7,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract ComEth {
     using Address for address payable;
     using Counters for Counters.Counter;
-
-    //types de votes
-
-    uint256 private _numberVote;
     
     enum StatusVote {
         Inactive,
@@ -29,7 +25,7 @@ contract ComEth {
     struct Proposal {
         string[] voteOptions;
         // comptabilisation votes
-        uint256[voteOptions.length] voteCount; 
+        uint256[] voteCount; 
         StatusVote statusVote;
         uint256 createdAt;
         address author;
@@ -43,7 +39,6 @@ contract ComEth {
 
 
     string private _stringVote;
-
     Proposal[] private _proposalsList;
     Counters.Counter private _id;
 
@@ -69,11 +64,10 @@ contract ComEth {
     ) public returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
-        uint256[2] memory arrayTemp_;
 
         _proposals[id] = Proposal({
             voteOptions: voteOptions_,
-            voteCount: arrayTemp_,
+            voteCount: new uint256[](voteOptions_.length),
             statusVote: StatusVote.Running,
             createdAt: block.timestamp,
             author: msg.sender,
