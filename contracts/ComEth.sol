@@ -9,17 +9,11 @@ contract ComEth {
     using Counters for Counters.Counter;
 
     //types de votes
-    enum YesNo {
-        yes,
-        no,
-        blank
-    }
 
-    enum VoteFormatting {
-        YesNo,
-        numberVote,
-        selectVote
-    }
+    uint256 private _numberVote;
+    
+    string[] private _selectVote;
+
 
     enum StatusVote {
         Inactive,
@@ -49,12 +43,11 @@ contract ComEth {
     bool private _isActive;
     bool private _hasPaid;
 
-    Proposal[] public selectVote;
     Users[] public nbUsers;
+
 
     string private _stringVote;
 
-    uint256 private _numberVote;
 
     Counters.Counter private _id;
 
