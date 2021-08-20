@@ -15,9 +15,8 @@ contract ComEth {
         blank
     }
 
-    enum Vote {
+    enum VoteFormatting {
         YesNo,
-        stringVote,
         numberVote,
         selectVote
     }
@@ -37,11 +36,13 @@ contract ComEth {
     }
 
     struct Proposal {
-        Vote vote;
+        VoteFormatting vote;
         StatusVote statusVote;
         uint256 createdAt;
         address author;
         string proposition;
+        // comptabilisation votes
+        uint256[] voteResults;
     }
 
     address private _comEthOwner;
@@ -59,6 +60,7 @@ contract ComEth {
 
     mapping(address => User) private _users;
     mapping(uint256 => Proposal) private _proposals;
+    mapping(uint256 => mapping(Proposal => YesNo));
     mapping(address => mapping(uint256 => bool)) private _hasVoted;
     mapping(uint256 => uint256) private _timeLimits;
     mapping(uint256 => uint256) private _nbVotes;
@@ -72,7 +74,7 @@ contract ComEth {
 
     //votes
     function submitProposal(
-        Vote vote_,
+        VoteFormatting vote_,
         string memory proposition,
         uint256 timeLimit
     ) public returns (uint256) {
@@ -97,18 +99,18 @@ contract ComEth {
         return  selectVote;
     }
 
-    function vote(uint256 id, Vote vote_) public {
+    function voteYesNo(uint256 id, YesNo answer) public {
         require(_hasVoted[msg.sender][id] == false, "ComEth: Already voted");
         require(_proposals[id].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
         
         if(block.timestamp > _proposals[id].createdAt + _timeLimits[id]) {
-            /*if(_proposals[id].nbYes > _proposals[id].nbNo) {
+            if(_proposals[id].nbYes > _proposals[id].nbNo) {
                 _proposals[id].status = Status.Approved;
             } else {
                 _proposals[id].status = Status.Rejected;
-            }*/
+            }
         } else {
-            if(vote_ == Vote.Yes) {
+            if(vote_ == YesNo.Yes) {
                 _proposals[id].nbYes += 1;
             } else {
                 _proposals[id].nbNo += 1;
