@@ -90,14 +90,14 @@ contract ComEth {
         return  _proposalsList;
     }
 
-    function voteYesNo(uint256 id_, uint256 userChoice_) public {
+    function vote(uint256 id_, uint256 userChoice_) public {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
         
         if(block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
             if(_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
                 _proposals[id_].statusVote = StatusVote.Approved;
-                proceedPaiement(id_);
+                _proceedPaiement(id_);
             } else {
                 _proposals[id_].statusVote = StatusVote.Rejected;
             }
@@ -106,14 +106,14 @@ contract ComEth {
             _proposals[id_].voteCount[userChoice_] += 1;
             if(_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
                 _proposals[id_].statusVote = StatusVote.Approved;
-                proceedPaiement(id_);
+                _proceedPaiement(id_);
         }
     }
     }
 
     //paiement
-    function proceedPaiement(uint256 id_) public payable {
-        
+    function _proceedPaiement(uint256 id_) private {
+        payable(_proposals[id_].paiementReceiver).sendValue(_proposals[id_].paiementAmount);
     }
 
     //gestion des membres/rôles
