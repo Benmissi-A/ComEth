@@ -43,7 +43,7 @@ contract ComEth {
     Proposal[] private _proposalsList;
     Counters.Counter private _id;
 
-    mapping (address => uint256) private _balances;
+    mapping(address => uint256) private _balances;
     mapping(address => User) private _users;
     mapping(uint256 => Proposal) private _proposals;
     //mapping(uint256 => mapping(Proposal => YesNo));
@@ -147,7 +147,14 @@ contract ComEth {
     }
 
     //prison
-    function ban() public {}
+    function tiggleIsBanned(address userAddress_) public returns (bool) {
+        if (_users[userAddress_].isBanned = false) {
+            _users[userAddress_].isBanned = true;
+        } else {
+            _users[userAddress_].isBanned = false;
+        }
+        return _users[userAddress_].isBanned;
+    }
 
     function getIsBanned(address userAddress) public view returns (bool) {
         return _users[userAddress].isBanned;
