@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract ComEth {
     using Address for address payable;
     using Counters for Counters.Counter;
-    
+
     enum StatusVote {
         Inactive,
         Running,
@@ -21,10 +21,10 @@ contract ComEth {
         bool hasPaid;
         bool isActive;
     }
-// Proposal correct
+    // Proposal correct
     struct Proposal {
         string[] voteOptions;
-        uint256[] voteCount; 
+        uint256[] voteCount;
         StatusVote statusVote;
         uint256 createdAt;
         address author;
@@ -43,6 +43,7 @@ contract ComEth {
     Proposal[] private _proposalsList;
     Counters.Counter private _id;
 
+    mapping (address => uint256) private _balances;
     mapping(address => User) private _users;
     mapping(uint256 => Proposal) private _proposals;
     //mapping(uint256 => mapping(Proposal => YesNo));
@@ -55,7 +56,9 @@ contract ComEth {
     }
 
     //pot commun
-    receive() external payable {}
+    receive() external payable {
+        _deposit(msg.sender, msg.value);
+    }
 
     //votes
     function submitProposal(
@@ -82,20 +85,21 @@ contract ComEth {
         _proposalsList.push(_proposals[id]);
         return id;
     }
-    function proposalById(uint256 id_) public view returns(Proposal memory) {
+
+    function proposalById(uint256 id_) public view returns (Proposal memory) {
         return _proposals[id_];
     }
 
-        function getProposalsList() public view returns(Proposal[] memory) {
-        return  _proposalsList;
+    function getProposalsList() public view returns (Proposal[] memory) {
+        return _proposalsList;
     }
 
     function vote(uint256 id_, uint256 userChoice_) public {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
-        
-        if(block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
-            if(_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
+
+        if (block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
+            if (_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
                 _proposals[id_].statusVote = StatusVote.Approved;
                 _proceedPaiement(id_);
             } else {
@@ -104,11 +108,11 @@ contract ComEth {
         } else {
             _hasVoted[msg.sender][id_] = true;
             _proposals[id_].voteCount[userChoice_] += 1;
-            if(_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
+            if (_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
                 _proposals[id_].statusVote = StatusVote.Approved;
                 _proceedPaiement(id_);
+            }
         }
-    }
     }
 
     //paiement
@@ -124,6 +128,22 @@ contract ComEth {
             _users[userAddress].isActive = false;
         }
         return _users[userAddress].isActive;
+    }
+
+    //ajouter utilisateur
+    function addUser(address userAddress_) public {
+        _users[userAddress_] = User({userAddress: userAddress_, isBanned: false, hasPaid: false, isActive: true});
+        _usersList.push(_users[userAddress_]);
+    }
+
+    //callback
+
+    function _deposit(address sender, uint256 amount) private {
+        _balances[sender] += amount;
+    }
+
+    function pay(uint256 amount_) external payable {
+        _deposit(msg.sender, amount_);
     }
 
     //prison
