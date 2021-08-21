@@ -35,7 +35,7 @@ contract ComEth {
     bool private _isActive;
     bool private _hasPaid;
 
-    //Users[] public nbUsers;
+    User[] private _usersList;
 
 
     string private _stringVote;
@@ -60,7 +60,7 @@ contract ComEth {
     function submitProposal(
         string[] memory voteOptions_,
         string memory proposition_,
-        uint256 timeLimit
+        uint256 timeLimit_
     ) public returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
@@ -73,7 +73,7 @@ contract ComEth {
             author: msg.sender,
             proposition: proposition_
         });
-        _timeLimits[id] = timeLimit;
+        _timeLimits[id] = timeLimit_;
         _proposalsList.push(_proposals[id]);
         return id;
     }
@@ -85,29 +85,22 @@ contract ComEth {
         return  _proposalsList;
     }
 
-    // function voteYesNo(uint256 id, YesNo answer) public {
-    //     require(_hasVoted[msg.sender][id] == false, "ComEth: Already voted");
-    //     require(_proposals[id].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
+    function voteYesNo(uint256 id, uint256 userChoice_) public {
+        require(_hasVoted[msg.sender][id] == false, "ComEth: Already voted");
+        require(_proposals[id].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
         
-    //     if(block.timestamp > _proposals[id].createdAt + _timeLimits[id]) {
-    //         if(_proposals[id].nbYes > _proposals[id].nbNo) {
-    //             _proposals[id].status = Status.Approved;
-    //         } else {
-    //             _proposals[id].status = Status.Rejected;
-    //         }
-    //     } else {
-    //         if(vote_ == YesNo.Yes) {
-    //             _proposals[id].nbYes += 1;
-    //         } else {
-    //             _proposals[id].nbNo += 1;
-    //         }
-    //         _hasVoted[msg.sender][id] = true;
-    //         _nbVotes[id] += 1;
-    //         if(nbUsers.length = _nbVotes[id]) {
-    //             //resolve vote
-    //         }
-    //     }
-    // }
+        if(block.timestamp > _proposals[id].createdAt + _timeLimits[id]) {
+            if(_proposals[id].voteCount[userChoice_] > _usersList.length / 2) {
+                _proposals[id].statusVote = StatusVote.Approved;
+                //proceedPaiement()
+            } else {
+                _proposals[id].statusVote = StatusVote.Rejected;
+            }
+        } else {
+            _hasVoted[msg.sender][id] = true;
+            _proposals[id].voteCount[userChoice_] += 1;
+        }
+    }
 
     //paiement
     function proceedPaiement() external payable {}
