@@ -24,19 +24,20 @@ contract ComEth {
 // Proposal correct
     struct Proposal {
         string[] voteOptions;
-        // comptabilisation votes
         uint256[] voteCount; 
         StatusVote statusVote;
         uint256 createdAt;
         address author;
         string proposition;
+        address paiementReceiver;
+        uint256 paiementAmount;
     }
+
     address private _comEthOwner;
     bool private _isActive;
     bool private _hasPaid;
 
     User[] private _usersList;
-
 
     string private _stringVote;
     Proposal[] private _proposalsList;
@@ -60,7 +61,9 @@ contract ComEth {
     function submitProposal(
         string[] memory voteOptions_,
         string memory proposition_,
-        uint256 timeLimit_
+        uint256 timeLimit_,
+        address paiementReceiver_,
+        uint256 paiementAmount_
     ) public returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
@@ -71,39 +74,47 @@ contract ComEth {
             statusVote: StatusVote.Running,
             createdAt: block.timestamp,
             author: msg.sender,
-            proposition: proposition_
+            proposition: proposition_,
+            paiementReceiver: paiementReceiver_,
+            paiementAmount: paiementAmount_
         });
         _timeLimits[id] = timeLimit_;
         _proposalsList.push(_proposals[id]);
         return id;
     }
-    function proposalById(uint256 id) public view returns(Proposal memory) {
-        return _proposals[id];
+    function proposalById(uint256 id_) public view returns(Proposal memory) {
+        return _proposals[id_];
     }
 
         function getProposalsList() public view returns(Proposal[] memory) {
         return  _proposalsList;
     }
 
-    function voteYesNo(uint256 id, uint256 userChoice_) public {
-        require(_hasVoted[msg.sender][id] == false, "ComEth: Already voted");
-        require(_proposals[id].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
+    function voteYesNo(uint256 id_, uint256 userChoice_) public {
+        require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
+        require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
         
-        if(block.timestamp > _proposals[id].createdAt + _timeLimits[id]) {
-            if(_proposals[id].voteCount[userChoice_] > _usersList.length / 2) {
-                _proposals[id].statusVote = StatusVote.Approved;
-                //proceedPaiement()
+        if(block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
+            if(_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
+                _proposals[id_].statusVote = StatusVote.Approved;
+                proceedPaiement(id_);
             } else {
-                _proposals[id].statusVote = StatusVote.Rejected;
+                _proposals[id_].statusVote = StatusVote.Rejected;
             }
         } else {
-            _hasVoted[msg.sender][id] = true;
-            _proposals[id].voteCount[userChoice_] += 1;
+            _hasVoted[msg.sender][id_] = true;
+            _proposals[id_].voteCount[userChoice_] += 1;
+            if(_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
+                _proposals[id_].statusVote = StatusVote.Approved;
+                proceedPaiement(id_);
         }
+    }
     }
 
     //paiement
-    function proceedPaiement() external payable {}
+    function proceedPaiement(uint256 id_) public payable {
+        
+    }
 
     //gestion des membres/rôles
     function _toggleIsActive(address userAddress) private returns (bool) {
