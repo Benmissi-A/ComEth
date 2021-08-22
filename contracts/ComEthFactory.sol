@@ -5,7 +5,7 @@ import "./ComEth.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ComEthFactory is Ownable {
-    ComEth[] public comEthAddresses;
+    ComEth[] private _comEthAddresses;
     address private _factoryOwner;
     event ComEthCreated(ComEth comEth, address indexed comEthOwner);
 
@@ -16,7 +16,11 @@ contract ComEthFactory is Ownable {
     function createComEth(address comEthOwner_) external {
         ComEth comEth = new ComEth(comEthOwner_);
 
-        comEthAddresses.push(comEth);
+        _comEthAddresses.push(comEth);
         emit ComEthCreated(comEth, comEthOwner_);
+    }
+
+    function getComEths() public view returns(ComEth[] memory){
+        return _comEthAddresses;
     }
 }
