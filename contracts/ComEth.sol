@@ -39,6 +39,7 @@ contract ComEth {
 
     User[] private _usersList;
 
+    uint256 private _balance;
     string private _stringVote;
     Proposal[] private _proposalsList;
     Counters.Counter private _id;
@@ -117,6 +118,7 @@ contract ComEth {
 
     //paiement
     function _proceedPaiement(uint256 id_) private {
+        //payable(_proposals[id_].paiementReceiver).sendValue(_proposals[id_].paiementAmount);
         payable(_proposals[id_].paiementReceiver).sendValue(_proposals[id_].paiementAmount);
     }
 
@@ -139,6 +141,7 @@ contract ComEth {
     //callback
 
     function _deposit(address sender, uint256 amount) private {
+        _balances[address(this)] += amount;
         _balances[sender] += amount;
     }
 
@@ -147,7 +150,7 @@ contract ComEth {
     }
 
     //prison
-    function tiggleIsBanned(address userAddress_) public returns (bool) {
+    function toggleIsBanned(address userAddress_) public returns (bool) {
         if (_users[userAddress_].isBanned = false) {
             _users[userAddress_].isBanned = true;
         } else {
@@ -156,9 +159,12 @@ contract ComEth {
         return _users[userAddress_].isBanned;
     }
 
-    function getIsBanned(address userAddress) public view returns (bool) {
-        return _users[userAddress].isBanned;
+    function getIsBanned(address userAddress_) public view returns (bool) {
+        return _users[userAddress_].isBanned;
     }
 
-    //fermeture de comEth
+    function getBalance(address userAddress_) public view returns (uint256){
+        return _balances[userAddress_];
+    }       
+ //fermeture de comEth
 }
