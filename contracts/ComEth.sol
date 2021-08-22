@@ -62,12 +62,10 @@ contract ComEth {
         _comEthOwner = comEthOwner_;
     }
 
-    //pot commun
     receive() external payable {
         _deposit(msg.sender, msg.value);
     }
 
-    //votes
     function submitProposal(
         string[] memory voteOptions_,
         string memory proposition_,
@@ -124,13 +122,11 @@ contract ComEth {
         emit Voted(msg.sender, id_, _proposals[id_].proposition);
     }
 
-    //paiement
     function _proceedPaiement(uint256 id_) private {
         payable(_proposals[id_].paiementReceiver).sendValue(_proposals[id_].paiementAmount);
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    //gestion des membres/rôles
     function _toggleIsActive(address userAddress) private returns (bool) {
         if (_users[userAddress].isActive = false) {
             _users[userAddress].isActive = true;
@@ -140,14 +136,11 @@ contract ComEth {
         return _users[userAddress].isActive;
     }
 
-    //ajouter utilisateur
     function addUser(address userAddress_) public {
         _users[userAddress_] = User({userAddress: userAddress_, isBanned: false, hasPaid: false, isActive: true});
         _usersList.push(_users[userAddress_]);
         emit UserAdded(userAddress_, block.timestamp);
     }
-
-    //callback
 
     function _deposit(address sender, uint256 amount) private {
         _balances[address(this)] += amount;
@@ -159,7 +152,6 @@ contract ComEth {
         _deposit(msg.sender, amount_);
     }
 
-    //prison
     function toggleIsBanned(address userAddress_) public returns (bool) {
         if (_users[userAddress_].isBanned = false) {
             _users[userAddress_].isBanned = true;
@@ -177,5 +169,15 @@ contract ComEth {
     function getBalance(address userAddress_) public view returns (uint256){
         return _balances[userAddress_];
     }       
- //fermeture de comEth
+
+    /* - Créer rôles
+        - Voter rôles / élections
+        - Etoffer les options de vote (bannir, ...)
+        - Gérer cotisations : cycles?
+        - Gérer transactions en token
+        - Getteurs
+        - Ajouter modifiers
+        - Sortie d'un user de la DAO + remboursement eventuel
+        - fermeture de comEth + répartition du pot commun restant 
+     */ 
 }
