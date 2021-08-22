@@ -51,6 +51,13 @@ contract ComEth {
     mapping(uint256 => uint256) private _timeLimits;
     mapping(uint256 => uint256) private _nbVotes;
 
+    event Deposited(address indexed sender, uint256 amount);
+    event ProposalCreated(Proposal proposal);
+    event Voted(address indexed voter, uint256 proposalId, string proposalDescription);
+    event Spent(address paymentReceiver, uint256 amount, uint256 proposalId);
+    event UserAdded(address indexed newUser, uint256 timestamp);
+    event IsBanned(address user, uint256 timestamp, bool status);
+
     constructor(address comEthOwner_) {
         _comEthOwner = comEthOwner_;
     }
@@ -83,6 +90,7 @@ contract ComEth {
         });
         _timeLimits[id] = timeLimit_;
         _proposalsList.push(_proposals[id]);
+        emit ProposalCreated(_proposals[id]);
         return id;
     }
 
@@ -113,11 +121,13 @@ contract ComEth {
                 _proceedPaiement(id_);
             }
         }
+        emit Voted(msg.sender, id_, _proposals[id_].proposition);
     }
 
     //paiement
     function _proceedPaiement(uint256 id_) private {
         payable(_proposals[id_].paiementReceiver).sendValue(_proposals[id_].paiementAmount);
+        emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
     //gestion des membres/rôles
@@ -134,6 +144,7 @@ contract ComEth {
     function addUser(address userAddress_) public {
         _users[userAddress_] = User({userAddress: userAddress_, isBanned: false, hasPaid: false, isActive: true});
         _usersList.push(_users[userAddress_]);
+        emit UserAdded(userAddress_, block.timestamp);
     }
 
     //callback
@@ -141,6 +152,7 @@ contract ComEth {
     function _deposit(address sender, uint256 amount) private {
         _balances[address(this)] += amount;
         _balances[sender] += amount;
+        emit Deposited(sender, amount);
     }
 
     function pay(uint256 amount_) external payable {
@@ -154,6 +166,7 @@ contract ComEth {
         } else {
             _users[userAddress_].isBanned = false;
         }
+        emit IsBanned(userAddress_, block.timestamp, _users[userAddress_].isBanned);
         return _users[userAddress_].isBanned;
     }
 
