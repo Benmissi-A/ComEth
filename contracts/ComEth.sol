@@ -47,7 +47,6 @@ contract ComEth {
     mapping(address => uint256) private _balances;
     mapping(address => User) private _users;
     mapping(uint256 => Proposal) private _proposals;
-    //mapping(uint256 => mapping(Proposal => YesNo));
     mapping(address => mapping(uint256 => bool)) private _hasVoted;
     mapping(uint256 => uint256) private _timeLimits;
     mapping(uint256 => uint256) private _nbVotes;
@@ -118,7 +117,6 @@ contract ComEth {
 
     //paiement
     function _proceedPaiement(uint256 id_) private {
-        //payable(_proposals[id_].paiementReceiver).sendValue(_proposals[id_].paiementAmount);
         payable(_proposals[id_].paiementReceiver).sendValue(_proposals[id_].paiementAmount);
     }
 
