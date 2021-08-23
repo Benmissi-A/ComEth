@@ -3,8 +3,9 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract ComEth {
+contract ComEth is AccessControl {
     using Address for address payable;
     using Counters for Counters.Counter;
 
@@ -36,6 +37,8 @@ contract ComEth {
     address private _comEthOwner;
     bool private _isActive;
     bool private _hasPaid;
+    //roles
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     User[] private _usersList;
 
@@ -60,6 +63,7 @@ contract ComEth {
 
     constructor(address comEthOwner_) {
         _comEthOwner = comEthOwner_;
+        _setupRole(ADMIN_ROLE, _comEthOwner);
     }
 
     receive() external payable {
