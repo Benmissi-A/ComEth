@@ -175,7 +175,10 @@ contract ComEth is AccessControl {
     }
     function getBalance()public view returns (uint256){
         return _balance;
-    }       
+    }    
+    function getAddressBalance() public view returns (uint256){
+        return address(this).balance;
+    }   
 
     /*  
         - Créer rôles
