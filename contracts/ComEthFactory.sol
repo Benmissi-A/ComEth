@@ -13,11 +13,10 @@ contract ComEthFactory is Ownable {
         _factoryOwner = factoryOwner_;
     }
 
-    function createComEth(address comEthOwner_) external {
-        ComEth comEth = new ComEth(comEthOwner_);
-
+    function createComEth() external {
+        ComEth comEth = new ComEth(msg.sender);
         _comEthAddresses.push(comEth);
-        emit ComEthCreated(comEth, comEthOwner_);
+        emit ComEthCreated(comEth, msg.sender);
     }
 
     function getComEths() public view returns(ComEth[] memory){
