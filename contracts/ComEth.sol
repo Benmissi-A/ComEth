@@ -44,7 +44,7 @@ contract ComEth {
     Proposal[] private _proposalsList;
     Counters.Counter private _id;
 
-    mapping(address => uint256) private _balances;
+    mapping(address => uint256) private _investMentBalances;
     mapping(address => User) private _users;
     mapping(uint256 => Proposal) private _proposals;
     mapping(address => mapping(uint256 => bool)) private _hasVoted;
@@ -143,8 +143,8 @@ contract ComEth {
     }
 
     function _deposit(address sender, uint256 amount) private {
-        _balances[address(this)] += amount;
-        _balances[sender] += amount;
+        _balance += amount;
+        _investMentBalances[sender] += amount;
         emit Deposited(sender, amount);
     }
 
@@ -167,7 +167,7 @@ contract ComEth {
     }
 
     function getBalance(address userAddress_) public view returns (uint256){
-        return _balances[userAddress_];
+        return _investMentBalances[userAddress_];
     }       
 
     /* - Créer rôles
