@@ -173,7 +173,8 @@ contract ComEth {
         return _balance;
     }       
 
-    /* - Créer rôles
+    /*  
+        - Créer rôles
         - Voter rôles / élections
         - Etoffer les options de vote (bannir, ...)
         - Gérer cotisations : cycles?
