@@ -42,7 +42,6 @@ contract ComEth is AccessControl {
 
     User[] private _usersList;
 
-    uint256 private _balance;
     string private _stringVote;
     Proposal[] private _proposalsList;
     Counters.Counter private _id;
@@ -109,7 +108,7 @@ contract ComEth is AccessControl {
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
         if (block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
-            if (_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
+            if (_proposals[id_].voteCount[userChoice_] > (_usersList.length / 2)) {
                 _proposals[id_].statusVote = StatusVote.Approved;
                 _proceedPaiement(id_);
             } else {
@@ -147,13 +146,13 @@ contract ComEth is AccessControl {
     }
 
     function _deposit(address sender, uint256 amount) private {
-        _balance += amount;
         _investMentBalances[sender] += amount;
         emit Deposited(sender, amount);
     }
 
-    function pay(uint256 amount_) external payable {
-        _deposit(msg.sender, amount_);
+    function pay() external payable {
+        uint256 amount = msg.value;
+        _deposit(msg.sender, amount);
     }
 
     function toggleIsBanned(address userAddress_) public returns (bool) {
@@ -170,16 +169,13 @@ contract ComEth is AccessControl {
         return _users[userAddress_].isBanned;
     }
 
-    function getInvestmentBalance(address userAddress_) public view returns (uint256){
+    function getInvestmentBalance(address userAddress_) public view returns (uint256) {
         return _investMentBalances[userAddress_];
     }
-    function getBalance()public view returns (uint256){
-        return _balance;
-    }    
-    function getAddressBalance() public view returns (uint256){
-        return address(this).balance;
-    }   
 
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
     /*  
         - Créer rôles
         - Voter rôles / élections
@@ -190,5 +186,5 @@ contract ComEth is AccessControl {
         - Ajouter modifiers
         - Sortie d'un user de la DAO + remboursement eventuel
         - fermeture de comEth + répartition du pot commun restant 
-     */ 
+     */
 }
