@@ -166,8 +166,11 @@ contract ComEth {
         return _users[userAddress_].isBanned;
     }
 
-    function getBalance(address userAddress_) public view returns (uint256){
+    function getInvestmentBalance(address userAddress_) public view returns (uint256){
         return _investMentBalances[userAddress_];
+    }
+    function getBalance()public view returns (uint256){
+        return _balance;
     }       
 
     /* - Créer rôles
