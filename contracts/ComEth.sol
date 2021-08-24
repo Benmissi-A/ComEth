@@ -110,7 +110,7 @@ contract ComEth is AccessControl {
         if (block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
             if (_proposals[id_].voteCount[userChoice_] > (_usersList.length / 2)) {
                 _proposals[id_].statusVote = StatusVote.Approved;
-                _proceedPaiement(id_);
+                _proceedPayment(id_);
             } else {
                 _proposals[id_].statusVote = StatusVote.Rejected;
             }
@@ -119,15 +119,19 @@ contract ComEth is AccessControl {
             _proposals[id_].voteCount[userChoice_] += 1;
             if (_proposals[id_].voteCount[userChoice_] > _usersList.length / 2) {
                 _proposals[id_].statusVote = StatusVote.Approved;
-                _proceedPaiement(id_);
+                _proceedPayment(id_);
             }
         }
         emit Voted(msg.sender, id_, _proposals[id_].proposition);
     }
 
-    function _proceedPaiement(uint256 id_) private {
+    function _proceedPayment(uint256 id_) private {
         payable(_proposals[id_].paiementReceiver).sendValue(_proposals[id_].paiementAmount);
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
+    }
+
+    function _ChangeRole() private {
+        emit RoleChanged();
     }
 
     function _toggleIsActive(address userAddress) private returns (bool) {
