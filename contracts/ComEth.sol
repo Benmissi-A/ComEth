@@ -38,7 +38,7 @@ contract ComEth is AccessControl {
     bool private _isActive;
     bool private _hasPaid;
     //roles
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    //bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     User[] private _usersList;
 
