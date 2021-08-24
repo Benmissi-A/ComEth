@@ -62,7 +62,7 @@ contract ComEth is AccessControl {
 
     constructor(address comEthOwner_) {
         _comEthOwner = comEthOwner_;
-        _setupRole(ADMIN_ROLE, _comEthOwner);
+        //_setupRole(ADMIN_ROLE, _comEthOwner);
     }
 
     receive() external payable {
@@ -130,9 +130,11 @@ contract ComEth is AccessControl {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function _ChangeRole() private {
-        emit RoleChanged();
-    }
+    // function _changeRole(bytes32 role_, address account_)  internal virtual {
+    //     _revokeRole(role_, account_);
+    //     _grantRole(role_, account_);
+    //     //emit RoleChanged();
+    // }
 
     function _toggleIsActive(address userAddress) private returns (bool) {
         if (_users[userAddress].isActive = false) {
