@@ -187,6 +187,9 @@ contract ComEth is AccessControl {
     }
 
     function quitComEth() public {
+        if(!_users[msg.sender].isBanned) {
+            _withdraw();
+        }
         
     }
 
