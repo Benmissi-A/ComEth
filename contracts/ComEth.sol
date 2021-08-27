@@ -56,13 +56,31 @@ contract ComEth is AccessControl {
     mapping(uint256 => uint256) private _timeLimits;
     mapping(uint256 => uint256) private _nbVotes;
 
+//events
+
     event Deposited(address indexed sender, uint256 amount);
+    event Withdrawn(address indexed recipient, uint256 amount);
     event ProposalCreated(Proposal proposal);
     event Voted(address indexed voter, uint256 proposalId, string proposalDescription);
     event Spent(address paymentReceiver, uint256 amount, uint256 proposalId);
     event UserAdded(address indexed newUser, uint256 timestamp);
     event IsBanned(address user, uint256 timestamp, bool status);
 
+//modifiers
+
+    modifier hasPaid {
+        require(_users[msg.sender].hasPaid = true , "Cometh: user have not payed subscription");
+        _;
+    }
+    modifier isBanned {
+        require(_users[msg.sender].isBanned = false , "Cometh: user is banned");
+        _;
+    }
+    modifier isActive {
+        require(_users[msg.sender].isActive = true , "Cometh: user is not active");
+        _;
+    }
+    
     constructor(address comEthOwner_,uint256 subscriptionPrice_) {
         _comEthOwner = comEthOwner_;
         _subscriptionPrice = subscriptionPrice_;
@@ -162,7 +180,9 @@ contract ComEth is AccessControl {
         emit Deposited(msg.sender, _subscriptionPrice);
     }
     function _withdraw() private {
-        payable(msg.sender).sendValue((_investMentBalances[msg.sender]/_investMentBalances[address(this)])*address(this).balance);
+        uint256 amount = (_investMentBalances[msg.sender]/_investMentBalances[address(this)])*address(this).balance;
+        payable(msg.sender).sendValue(amount);
+        emit Withdrawn(msg.sender, amount);
     }
     function pay() external payable {
         _deposit();
