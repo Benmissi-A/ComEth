@@ -22,7 +22,9 @@ contract ComEth is AccessControl {
         bool hasPaid;
         bool isActive;
     }
-    // Proposal correct
+
+// Proposal correct
+
     struct Proposal {
         string[] voteOptions;
         uint256[] voteCount;
