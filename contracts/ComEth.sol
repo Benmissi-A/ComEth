@@ -74,7 +74,7 @@ contract ComEth is AccessControl {
         require(_users[msg.sender].hasPaid = true , "Cometh: user have not payed subscription");
         _;
     }
-    modifier isBanned {
+    modifier isNotBanned {
         require(_users[msg.sender].isBanned = false , "Cometh: user is banned");
         _;
     }
@@ -100,7 +100,7 @@ contract ComEth is AccessControl {
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
-    ) public returns (uint256) {
+    ) public isNotBanned returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
 
@@ -128,7 +128,7 @@ contract ComEth is AccessControl {
         return _proposalsList;
     }
 
-    function vote(uint256 id_, uint256 userChoice_) public {
+    function vote(uint256 id_, uint256 userChoice_) public isNotBanned{
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
