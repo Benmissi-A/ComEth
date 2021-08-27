@@ -71,7 +71,7 @@ contract ComEth is AccessControl {
 //modifiers
 
     modifier hasPaid {
-        require(_users[msg.sender].hasPaid = true , "Cometh: user have not payed subscription");
+        require(_users[msg.sender].hasPaid = true , "Cometh: user has not paid subscription");
         _;
     }
     modifier isNotBanned {
