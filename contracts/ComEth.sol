@@ -71,7 +71,7 @@ contract ComEth is AccessControl {
     }
 
     receive() external payable {
-        _deposit(msg.sender, msg.value);
+        _deposit();
     }
 
     function submitProposal(
@@ -156,14 +156,16 @@ contract ComEth is AccessControl {
         emit UserAdded(userAddress_, block.timestamp);
     }
 
-    function _deposit(address sender, uint256 amount) private {
-        _investMentBalances[sender] += amount;
-        emit Deposited(sender, amount);
+    function _deposit() private {
+        _investMentBalances[address(this)] += _subscriptionPrice;
+        _investMentBalances[msg.sender] += _subscriptionPrice;
+        emit Deposited(msg.sender, _subscriptionPrice);
     }
-
+    function _withdraw() private {
+        payable(msg.sender).sendValue((_investMentBalances[msg.sender]/_investMentBalances[address(this)])*address(this).balance);
+    }
     function pay() external payable {
-        uint256 amount = msg.value;
-        _deposit(msg.sender, amount);
+        _deposit();
     }
 
     function toggleIsBanned(address userAddress_) public returns (bool) {
