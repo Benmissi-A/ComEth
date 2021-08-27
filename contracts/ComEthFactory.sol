@@ -19,8 +19,8 @@ contract ComEthFactory is Ownable {
         _factoryOwner = factoryOwner_;
     }
 
-    function createComEth() external {
-        ComEth comEth = new ComEth(msg.sender);
+    function createComEth(uint256 subscriptionPrice_) external {
+        ComEth comEth = new ComEth(msg.sender,subscriptionPrice_);
         _comEthAddresses.push(comEth);
         emit ComEthCreated(comEth, msg.sender);
     }

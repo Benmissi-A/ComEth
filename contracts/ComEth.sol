@@ -33,8 +33,11 @@ contract ComEth is AccessControl {
         address paiementReceiver;
         uint256 paiementAmount;
     }
-
     address private _comEthOwner;
+    
+    uint256 private _subscriptionPrice ;
+    uint256 private _subscriptionTimeCycle;
+    
     bool private _isActive;
     bool private _hasPaid;
     //roles
@@ -60,8 +63,10 @@ contract ComEth is AccessControl {
     event UserAdded(address indexed newUser, uint256 timestamp);
     event IsBanned(address user, uint256 timestamp, bool status);
 
-    constructor(address comEthOwner_) {
+    constructor(address comEthOwner_,uint256 subscriptionPrice_) {
         _comEthOwner = comEthOwner_;
+        _subscriptionPrice = subscriptionPrice_;
+        _subscriptionTimeCycle = 4 weeks;
         //_setupRole(ADMIN_ROLE, _comEthOwner);
     }
 
