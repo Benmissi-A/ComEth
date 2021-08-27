@@ -21,9 +21,8 @@ contract ComEth is AccessControl {
         bool isBanned;
         bool hasPaid;
         bool isActive;
+        uint256 unpaidSubscriptions;
     }
-
-// Proposal correct
 
     struct Proposal {
         string[] voteOptions;
@@ -35,21 +34,17 @@ contract ComEth is AccessControl {
         address paiementReceiver;
         uint256 paiementAmount;
     }
+
     address private _comEthOwner;
-    
     uint256 private _subscriptionPrice ;
     uint256 private _subscriptionTimeCycle;
-    
     bool private _isActive;
     bool private _hasPaid;
-    //roles
-    //bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
     User[] private _usersList;
-
     string private _stringVote;
     Proposal[] private _proposalsList;
     Counters.Counter private _id;
+    uint256 private _cycleStart;
 
     mapping(address => uint256) private _investMentBalances;
     mapping(address => User) private _users;
@@ -58,8 +53,6 @@ contract ComEth is AccessControl {
     mapping(uint256 => uint256) private _timeLimits;
     mapping(uint256 => uint256) private _nbVotes;
 
-//events
-
     event Deposited(address indexed sender, uint256 amount);
     event Withdrawn(address indexed recipient, uint256 amount);
     event ProposalCreated(Proposal proposal);
@@ -67,8 +60,6 @@ contract ComEth is AccessControl {
     event Spent(address paymentReceiver, uint256 amount, uint256 proposalId);
     event UserAdded(address indexed newUser, uint256 timestamp);
     event IsBanned(address user, uint256 timestamp, bool status);
-
-//modifiers
 
     modifier hasPaid {
         require(_users[msg.sender].hasPaid = true , "Cometh: user has not paid subscription");
@@ -87,7 +78,7 @@ contract ComEth is AccessControl {
         _comEthOwner = comEthOwner_;
         _subscriptionPrice = subscriptionPrice_;
         _subscriptionTimeCycle = 4 weeks;
-        //_setupRole(ADMIN_ROLE, _comEthOwner);
+        _cycleStart = block.timestamp;
     }
 
     receive() external payable {
@@ -100,7 +91,8 @@ contract ComEth is AccessControl {
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
-    ) public isNotBanned returns (uint256) {
+    ) public isActive isNotBanned hasPaid returns (uint256) {
+        _handleCycle();
         _id.increment();
         uint256 id = _id.current();
 
@@ -128,10 +120,11 @@ contract ComEth is AccessControl {
         return _proposalsList;
     }
 
-    function vote(uint256 id_, uint256 userChoice_) public isNotBanned{
+    function vote(uint256 id_, uint256 userChoice_) public isNotBanned hasPaid isActive {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
+        _handleCycle();
         if (block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
             if (_proposals[id_].voteCount[userChoice_] > (_usersList.length / 2)) {
                 _proposals[id_].statusVote = StatusVote.Approved;
@@ -155,42 +148,62 @@ contract ComEth is AccessControl {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    // function _changeRole(bytes32 role_, address account_)  internal virtual {
-    //     _revokeRole(role_, account_);
-    //     _grantRole(role_, account_);
-    //     //emit RoleChanged();
-    // }
-
-    function _toggleIsActive(address userAddress) private returns (bool) {
-        if (_users[userAddress].isActive = false) {
-            _users[userAddress].isActive = true;
+    function toggleIsActive() public returns (bool) {
+        if (_users[msg.sender].isActive = false) {
+            _users[msg.sender].isActive = true;
         } else {
-            _users[userAddress].isActive = false;
+            _users[msg.sender].isActive = false;
         }
-        return _users[userAddress].isActive;
+        return _users[msg.sender].isActive;
     }
 
     function addUser(address userAddress_) public {
-        _users[userAddress_] = User({userAddress: userAddress_, isBanned: false, hasPaid: false, isActive: true});
+        require(msg.sender == _comEthOwner, "ComEth: You are not allowed to add users.");
+        _users[userAddress_] = User({userAddress: userAddress_, isBanned: false, hasPaid: false, isActive: true, unpaidSubscriptions: 1});
         _usersList.push(_users[userAddress_]);
         emit UserAdded(userAddress_, block.timestamp);
     }
 
     function _deposit() private {
-        _investMentBalances[address(this)] += _subscriptionPrice;
-        _investMentBalances[msg.sender] += _subscriptionPrice;
-        emit Deposited(msg.sender, _subscriptionPrice);
+        _investMentBalances[address(this)] += _subscriptionPrice * _users[msg.sender].unpaidSubscriptions;
+        _investMentBalances[msg.sender] += _subscriptionPrice * _users[msg.sender].unpaidSubscriptions;
+        if(_users[msg.sender].isBanned) {
+            _users[msg.sender].isBanned = false;
+            _users[msg.sender].unpaidSubscriptions = 1;
+        }
+        _users[msg.sender].hasPaid = true;
+        emit Deposited(msg.sender, _subscriptionPrice * _users[msg.sender].unpaidSubscriptions);
     }
+
     function _withdraw() private {
         uint256 amount = (_investMentBalances[msg.sender]/_investMentBalances[address(this)])*address(this).balance;
         payable(msg.sender).sendValue(amount);
         emit Withdrawn(msg.sender, amount);
     }
+
     function pay() external payable {
+        require(_users[msg.sender].hasPaid = false, "ComEth: You have already paid your subscription for this month.");
         _deposit();
     }
 
-    function toggleIsBanned(address userAddress_) public returns (bool) {
+    function quitComEth() public {
+        
+    }
+
+    function _handleCycle() private {
+        if(block.timestamp > _cycleStart + _subscriptionTimeCycle) {
+            _cycleStart = _cycleStart + _subscriptionTimeCycle;
+            for(uint256 i=0; i < _usersList.length; i++) {
+                if((_users[_usersList[i].userAddress].hasPaid = false) && (_users[_usersList[i].userAddress].isActive = true)) {
+                    _users[_usersList[i].userAddress].isBanned = true;
+                    _users[_usersList[i].userAddress].unpaidSubscriptions += 1;
+                }
+                _users[_usersList[i].userAddress].hasPaid = false;
+            }
+        }
+    }
+
+    function _toggleIsBanned(address userAddress_) private returns (bool) {
         if (_users[userAddress_].isBanned = false) {
             _users[userAddress_].isBanned = true;
         } else {
