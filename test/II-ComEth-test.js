@@ -20,11 +20,12 @@ getBalance
 
 describe('ComEth', function () {
   let ComEth, comEth, dev, alice, bob, eve;
+  const subscriptionPrice = ethers.utils.parseEther('0.1');
 
   this.beforeEach(async function () {
     [dev, alice, bob, eve] = await ethers.getSigners();
     ComEth = await ethers.getContractFactory('ComEth');
-    comEth = await ComEth.connect(alice).deploy(alice.address, ethers.utils.parseEther('0.1'));
+    comEth = await ComEth.connect(alice).deploy(alice.address, subscriptionPrice);
     await comEth.deployed();
   });
   describe('addUsers', function () {
@@ -32,12 +33,15 @@ describe('ComEth', function () {
       await expect(comEth.addUser(bob.address)).to.emit(comEth, 'UserAdded').withArgs(bob.address);
     });
     it('has payed', async function () {
-      await expect(comEth.addUser(bob.address)).to.emit(comEth, 'UserAdded').withArgs(bob.address);
+      await comEth.connect(alice).addUser(bob.address)
+      await comEth.connect(bob).pay()
+      await expect(comEth.getInvestmentBalance(bob.address)).to.equal(subscriptionPrice)
     });
   });
   describe('Submit Proposal', function () {
     it('it submit proposal', async function () {
-      await comEth.addUser(bob.address);
+      await comEth.connect(alice).addUser(bob.address);
+      await comEth.connect(bob).pay();
       await expect(
         comEth
           .connect(bob)
