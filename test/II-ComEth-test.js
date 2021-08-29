@@ -37,10 +37,10 @@ describe('ComEth', function () {
         'ComEth: You are not allowed to add users.'
       );
     });
-    it('should revert with ComEth: user already exist', async function () {
-     await comEth.addUser(bob.address)
-     await expect(comEth.addUser(bob.address)).to.be.revertedWith('ComEth: user already exist');
-    });
+    // it('should revert with ComEth: user already exist', async function () {
+    //  await comEth.addUser(bob.address)
+    //  await expect(comEth.addUser(bob.address)).to.be.revertedWith('ComEth: user already exist');
+    // });
   });
   describe('Pay', function () {
     it('has payed', async function () {

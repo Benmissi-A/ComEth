@@ -48,7 +48,6 @@ contract ComEth is AccessControl {
 
     mapping(address => uint256) private _investMentBalances;
     mapping(address => User) private _users;
-    mapping(address => bool) private _userExists;
     mapping(uint256 => Proposal) private _proposals;
     mapping(address => mapping(uint256 => bool)) private _hasVoted;
     mapping(uint256 => uint256) private _timeLimits;
@@ -160,7 +159,6 @@ contract ComEth is AccessControl {
 
     function addUser(address userAddress_) public {
         require(msg.sender == _comEthOwner, "ComEth: You are not allowed to add users.");
-        require(_userExists[msg.sender] == false , "ComEth: user already exist");
         _users[userAddress_] = User({
             userAddress: userAddress_,
             isBanned: false,
@@ -168,7 +166,6 @@ contract ComEth is AccessControl {
             isActive: true,
             unpaidSubscriptions: 1
         });
-        _userExists[userAddress_] = true;
         _usersList.push(_users[userAddress_]);
         emit UserAdded(userAddress_);
     }
