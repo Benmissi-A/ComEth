@@ -29,7 +29,7 @@ contract ComEthFactory is Ownable {
         return _comEthAddresses;
     }
 
-    function getFactoryOwner() public returns (address){
+    function getFactoryOwner() public view returns (address){
         return _factoryOwner;
     }
 }
