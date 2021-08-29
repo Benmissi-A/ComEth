@@ -5,7 +5,18 @@
 
 const { expect } = require('chai');
 
-//const { getContractAddress } = require('@ethersproject/address');
+/* 
+proposalById
+getProposalsList
+vote
+toggleIsActive
+addUser
+pay
+quitComEth
+getIsBanned
+getInvestmentBalance
+getBalance
+*/
 
 describe('ComEth', function () {
   let ComEth, comEth, dev, alice, bob, eve;
@@ -16,11 +27,14 @@ describe('ComEth', function () {
     comEth = await ComEth.connect(alice).deploy(alice.address, ethers.utils.parseEther('0.1'));
     await comEth.deployed();
   });
-  describe('addUsers',function(){
-    it('should emit UserAdded', async function(){
-      await expect(comEth.addUser(bob.address)).to.emit(comEth,'UserAdded').withArgs(bob.address)
+  describe('addUsers', function () {
+    it('should emit UserAdded', async function () {
+      await expect(comEth.addUser(bob.address)).to.emit(comEth, 'UserAdded').withArgs(bob.address);
     });
-  })
+    it('has payed', async function () {
+      await expect(comEth.addUser(bob.address)).to.emit(comEth, 'UserAdded').withArgs(bob.address);
+    });
+  });
   describe('Submit Proposal', function () {
     it('it submit proposal', async function () {
       await comEth.addUser(bob.address);
@@ -37,6 +51,11 @@ describe('ComEth', function () {
       )
         .to.emit(comEth, 'ProposalCreated')
         .withArgs(1, 'qui sont les meilleurs');
+    });
+    describe('Vote', function () {
+      it('should emit Voted', async function () {
+        //await expect(comEth.addUser(bob.address)).to.emit(comEth, 'UserAdded').withArgs(bob.address);
+      });
     });
   });
 });
