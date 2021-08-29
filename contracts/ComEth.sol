@@ -62,15 +62,15 @@ contract ComEth is AccessControl {
     event IsBanned(address user, uint256 timestamp, bool status);
 
     modifier hasPaid() {
-        require(_users[msg.sender].hasPaid = true, "Cometh: user has not paid subscription");
+        require(_users[msg.sender].hasPaid == true, "Cometh: user has not paid subscription");
         _;
     }
     modifier isNotBanned() {
-        require(_users[msg.sender].isBanned = false, "Cometh: user is banned");
+        require(_users[msg.sender].isBanned == false, "Cometh: user is banned");
         _;
     }
     modifier isActive() {
-        require(_users[msg.sender].isActive = true, "Cometh: user is not active");
+        require(_users[msg.sender].isActive == true, "Cometh: user is not active");
         _;
     }
 
@@ -149,7 +149,7 @@ contract ComEth is AccessControl {
     }
 
     function toggleIsActive() public returns (bool) {
-        if (_users[msg.sender].isActive = false) {
+        if (_users[msg.sender].isActive == false) {
             _users[msg.sender].isActive = true;
         } else {
             _users[msg.sender].isActive = false;
@@ -188,7 +188,7 @@ contract ComEth is AccessControl {
     }
 
     function pay() external payable {
-        require(_users[msg.sender].hasPaid = false, "ComEth: You have already paid your subscription for this month.");
+        require(_users[msg.sender].hasPaid == false, "ComEth: You have already paid your subscription for this month.");
         _deposit();
     }
 
@@ -203,8 +203,8 @@ contract ComEth is AccessControl {
             _cycleStart = _cycleStart + _subscriptionTimeCycle;
             for (uint256 i = 0; i < _usersList.length; i++) {
                 if (
-                    (_users[_usersList[i].userAddress].hasPaid = false) &&
-                    (_users[_usersList[i].userAddress].isActive = true)
+                    (_users[_usersList[i].userAddress].hasPaid == false) &&
+                    (_users[_usersList[i].userAddress].isActive == true)
                 ) {
                     _users[_usersList[i].userAddress].isBanned = true;
                     _users[_usersList[i].userAddress].unpaidSubscriptions += 1;
@@ -215,7 +215,7 @@ contract ComEth is AccessControl {
     }
 
     function _toggleIsBanned(address userAddress_) private returns (bool) {
-        if (_users[userAddress_].isBanned = false) {
+        if (_users[userAddress_].isBanned == false) {
             _users[userAddress_].isBanned = true;
         } else {
             _users[userAddress_].isBanned = false;

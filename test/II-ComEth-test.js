@@ -29,13 +29,15 @@ describe('ComEth', function () {
     await comEth.deployed();
   });
   describe('addUsers', function () {
+    
     it('should emit UserAdded', async function () {
       await expect(comEth.addUser(bob.address)).to.emit(comEth, 'UserAdded').withArgs(bob.address);
     });
+
     it('has payed', async function () {
-      await comEth.connect(alice).addUser(bob.address)
-      await comEth.connect(bob).pay()
-      await expect(comEth.getInvestmentBalance(bob.address)).to.equal(subscriptionPrice)
+      await comEth.addUser(alice.address)
+      await comEth.pay()
+      expect(await comEth.getInvestmentBalance(alice.address)).to.equal(subscriptionPrice)
     });
   });
   describe('Submit Proposal', function () {
