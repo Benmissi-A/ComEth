@@ -36,7 +36,7 @@ contract ComEth is AccessControl {
     }
 
     address private _comEthOwner;
-    uint256 private _subscriptionPrice ;
+    uint256 private _subscriptionPrice;
     uint256 private _subscriptionTimeCycle;
     bool private _isActive;
     bool private _hasPaid;
@@ -55,26 +55,26 @@ contract ComEth is AccessControl {
 
     event Deposited(address indexed sender, uint256 amount);
     event Withdrawn(address indexed recipient, uint256 amount);
-    event ProposalCreated(Proposal proposal);
+    event ProposalCreated(uint256 id, string description);
     event Voted(address indexed voter, uint256 proposalId, string proposalDescription);
     event Spent(address paymentReceiver, uint256 amount, uint256 proposalId);
-    event UserAdded(address indexed newUser, uint256 timestamp);
+    event UserAdded(address indexed newUser);
     event IsBanned(address user, uint256 timestamp, bool status);
 
-    modifier hasPaid {
-        require(_users[msg.sender].hasPaid = true , "Cometh: user has not paid subscription");
+    modifier hasPaid() {
+        require(_users[msg.sender].hasPaid = true, "Cometh: user has not paid subscription");
         _;
     }
-    modifier isNotBanned {
-        require(_users[msg.sender].isBanned = false , "Cometh: user is banned");
+    modifier isNotBanned() {
+        require(_users[msg.sender].isBanned = false, "Cometh: user is banned");
         _;
     }
-    modifier isActive {
-        require(_users[msg.sender].isActive = true , "Cometh: user is not active");
+    modifier isActive() {
+        require(_users[msg.sender].isActive = true, "Cometh: user is not active");
         _;
     }
-    
-    constructor(address comEthOwner_,uint256 subscriptionPrice_) {
+
+    constructor(address comEthOwner_, uint256 subscriptionPrice_) {
         _comEthOwner = comEthOwner_;
         _subscriptionPrice = subscriptionPrice_;
         _subscriptionTimeCycle = 4 weeks;
@@ -108,7 +108,7 @@ contract ComEth is AccessControl {
         });
         _timeLimits[id] = timeLimit_;
         _proposalsList.push(_proposals[id]);
-        emit ProposalCreated(_proposals[id]);
+        emit ProposalCreated(id, _proposals[id].proposition);
         return id;
     }
 
@@ -159,15 +159,21 @@ contract ComEth is AccessControl {
 
     function addUser(address userAddress_) public {
         require(msg.sender == _comEthOwner, "ComEth: You are not allowed to add users.");
-        _users[userAddress_] = User({userAddress: userAddress_, isBanned: false, hasPaid: false, isActive: true, unpaidSubscriptions: 1});
+        _users[userAddress_] = User({
+            userAddress: userAddress_,
+            isBanned: false,
+            hasPaid: false,
+            isActive: true,
+            unpaidSubscriptions: 1
+        });
         _usersList.push(_users[userAddress_]);
-        emit UserAdded(userAddress_, block.timestamp);
+        emit UserAdded(userAddress_);
     }
 
     function _deposit() private {
         _investMentBalances[address(this)] += _subscriptionPrice * _users[msg.sender].unpaidSubscriptions;
         _investMentBalances[msg.sender] += _subscriptionPrice * _users[msg.sender].unpaidSubscriptions;
-        if(_users[msg.sender].isBanned) {
+        if (_users[msg.sender].isBanned) {
             _users[msg.sender].isBanned = false;
             _users[msg.sender].unpaidSubscriptions = 1;
         }
@@ -176,7 +182,7 @@ contract ComEth is AccessControl {
     }
 
     function _withdraw() private {
-        uint256 amount = (_investMentBalances[msg.sender]/_investMentBalances[address(this)])*address(this).balance;
+        uint256 amount = (_investMentBalances[msg.sender] / _investMentBalances[address(this)]) * address(this).balance;
         payable(msg.sender).sendValue(amount);
         emit Withdrawn(msg.sender, amount);
     }
@@ -187,17 +193,19 @@ contract ComEth is AccessControl {
     }
 
     function quitComEth() public {
-        if(!_users[msg.sender].isBanned) {
+        if (!_users[msg.sender].isBanned) {
             _withdraw();
         }
-        
     }
 
     function _handleCycle() private {
-        if(block.timestamp > _cycleStart + _subscriptionTimeCycle) {
+        if (block.timestamp > _cycleStart + _subscriptionTimeCycle) {
             _cycleStart = _cycleStart + _subscriptionTimeCycle;
-            for(uint256 i=0; i < _usersList.length; i++) {
-                if((_users[_usersList[i].userAddress].hasPaid = false) && (_users[_usersList[i].userAddress].isActive = true)) {
+            for (uint256 i = 0; i < _usersList.length; i++) {
+                if (
+                    (_users[_usersList[i].userAddress].hasPaid = false) &&
+                    (_users[_usersList[i].userAddress].isActive = true)
+                ) {
                     _users[_usersList[i].userAddress].isBanned = true;
                     _users[_usersList[i].userAddress].unpaidSubscriptions += 1;
                 }

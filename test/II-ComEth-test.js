@@ -7,30 +7,36 @@ const { expect } = require('chai');
 
 //const { getContractAddress } = require('@ethersproject/address');
 
-describe('ComEthFactory', function () {
-  let ComEthFactory, comEthFactory, dev, alice, bob, eve;
+describe('ComEth', function () {
+  let ComEth, comEth, dev, alice, bob, eve;
 
   this.beforeEach(async function () {
     [dev, alice, bob, eve] = await ethers.getSigners();
-    ComEthFactory = await ethers.getContractFactory('ComEthFactory');
-    comEthFactory = await ComEthFactory.connect(dev).deploy(dev.address);
-    await comEthFactory.deployed();
+    ComEth = await ethers.getContractFactory('ComEth');
+    comEth = await ComEth.connect(alice).deploy(alice.address, ethers.utils.parseEther('0.1'));
+    await comEth.deployed();
   });
-
-  describe('functions', function () {
-    it('should emit event ComEthCreated', async function () {
-      // const transactionCount = await alice.getTransactionCount();
-      // const futureAddress = getContractAddress({
-      //   from: alice.address,
-      //   nonce: transactionCount,
-      // });
-      const futureAddress = '0xa16E02E87b7454126E5E10d957A927A7F5B5d2be';
-      await expect(comEthFactory.connect(alice).createComEth(ethers.utils.parseEther('0.1')))
-        .to.emit(comEthFactory, 'ComEthCreated')
-        .withArgs(futureAddress, alice.address);
+  describe('addUsers',function(){
+    it('should emit UserAdded', async function(){
+      await expect(comEth.addUser(bob.address)).to.emit(comEth,'UserAdded').withArgs(bob.address)
     });
-    it('should return factoryOwner ', async function () {
-      expect(await comEthFactory.getFactoryOwner()).to.equal(dev.address);
+  })
+  describe('Submit Proposal', function () {
+    it('it submit proposal', async function () {
+      await comEth.addUser(bob.address);
+      await expect(
+        comEth
+          .connect(bob)
+          .submitProposal(
+            ['one', 'two', 'Frééé'],
+            'qui sont les meilleurs',
+            900,
+            eve.address,
+            ethers.utils.parseEther('0.01')
+          )
+      )
+        .to.emit(comEth, 'ProposalCreated')
+        .withArgs(1, 'qui sont les meilleurs');
     });
   });
 });
