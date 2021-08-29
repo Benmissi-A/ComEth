@@ -18,7 +18,7 @@
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-standard": "^5.0.0",
     "ethereum-waffle": "^3.3.0",
-    "ethers": "^5.3.1",
+    "ethers": "^5.4.6",
     "hardhat": "^2.3.3",
     "hardhat-docgen": "^1.1.1",
     "prettier": "^2.3.1",
