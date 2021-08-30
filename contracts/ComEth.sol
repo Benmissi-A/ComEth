@@ -61,16 +61,16 @@ contract ComEth is AccessControl {
     event UserAdded(address indexed newUser);
     event IsBanned(address user, uint256 timestamp, bool status);
 
-    modifier hasPaid() {
-        require(_users[msg.sender].hasPaid == true, "Cometh: user has not paid subscription");
-        _;
-    }
     modifier isNotBanned() {
         require(_users[msg.sender].isBanned == false, "Cometh: user is banned");
         _;
     }
     modifier isActive() {
         require(_users[msg.sender].isActive == true, "Cometh: user is not active");
+        _;
+    }
+    modifier hasPaid() {
+        require(_users[msg.sender].hasPaid == true, "Cometh: user has not paid subscription");
         _;
     }
 
@@ -83,6 +83,10 @@ contract ComEth is AccessControl {
 
     receive() external payable {
         _deposit();
+    }
+
+    function handleCycle() public {
+        _handleCycle();
     }
 
     function submitProposal(

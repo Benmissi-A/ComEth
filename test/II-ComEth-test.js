@@ -49,21 +49,18 @@ describe('ComEth', function () {
       await comEth.addUser(bob.address);
       expect(await comEth.getIsBanned(bob.address)).to.equal(false);
     });
-        it('should return if isBanned is not active when cycle is elapsed', async function () {
-          await comEth.addUser(bob.address);
-              await comEth.connect(bob).toggleIsActive();
-               await ethers.provider.send('evm_increaseTime', [3600 * 24 * 15]);
-               await ethers.provider.send('evm_mine');
-          expect(await comEth.getIsBanned(bob.address)).to.equal(false);
-        });
-    it('should return if isBanned is true', async function () {
-      await comEth.addUser(eve.address);
+    it('should return if isBanned is not active when cycle is elapsed', async function () {
+      await comEth.addUser(bob.address);
+      await comEth.connect(bob).toggleIsActive();
       await ethers.provider.send('evm_increaseTime', [3600 * 24 * 15]);
       await ethers.provider.send('evm_mine');
-      await comEth.addUser(bob.address);
-       await comEth.connect(bob).pay();
-      await comEth.connect(bob).submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, alice.address, ethers.utils.parseEther('0.01'));
-     
+      expect(await comEth.getIsBanned(bob.address)).to.equal(false);
+    });
+    it('should return if isBanned is true', async function () {
+      await comEth.addUser(eve.address);
+      await ethers.provider.send('evm_increaseTime', [2629800]);
+      await ethers.provider.send('evm_mine');
+      await comEth.handleCycle();
       expect(await comEth.getIsBanned(eve.address)).to.equal(true);
     });
   });
@@ -92,6 +89,14 @@ describe('ComEth', function () {
       await comEth.pay();
       await expect(comEth.pay()).to.be.revertedWith('ComEth: You have already paid your subscription for this month.');
     });
+    it('should pay after a cycle', async function () {
+      await comEth.addUser(alice.address);
+      await comEth.pay();
+      await ethers.provider.send('evm_increaseTime', [2629800]);
+      await ethers.provider.send('evm_mine');
+      await comEth.handleCycle();
+      expect(await comEth.getInvestmentBalance(alice.address)).to.equal(ethers.utils.parseEther('0.1'));
+    });
   });
   describe('Submit Proposal', function () {
     it('should emmit ProposalCreated', async function () {
@@ -118,8 +123,9 @@ describe('ComEth', function () {
     it('should revert if isBanned', async function () {
       await comEth.connect(alice).addUser(bob.address);
       await comEth.connect(bob).pay();
-      await ethers.provider.send('evm_increaseTime', [3600 * 24 * 15]);
+      await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
+      await comEth.handleCycle();
       await expect(
         comEth
           .connect(bob)
