@@ -21,7 +21,7 @@ getBalance
 */
 
 describe('ComEth', function () {
-  let ComEth, comEth, dev, alice, bob, eve;
+  let ComEth, comEth, alice, bob, eve;
   const subscriptionPrice = ethers.utils.parseEther('0.1');
 
   this.beforeEach(async function () {
@@ -30,7 +30,7 @@ describe('ComEth', function () {
     comEth = await ComEth.connect(alice).deploy(alice.address, subscriptionPrice);
     await comEth.deployed();
   });
-  describe('Getters', function () {
+  describe('Getters / modifiers /user_statements', function () {
     it('should return if hasPaid is true', async function () {
       await comEth.addUser(bob.address);
       await comEth.connect(bob).pay();
@@ -95,6 +95,32 @@ describe('ComEth', function () {
       await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
       await comEth.handleCycle();
+      expect(await comEth.getInvestmentBalance(alice.address)).to.equal(ethers.utils.parseEther('0.1'));
+    });
+  });
+  describe('testing balances', function () {
+    it('should return balance', async function () {
+      await comEth.addUser(alice.address);
+      await comEth.addUser(bob.address);
+      await comEth.addUser(eve.address);
+      await comEth.pay();
+      await comEth.connect(bob).pay();
+      expect(await comEth.getBalance()).to.equal(0);
+    });
+    it('should return investmentBalance[comEth.address] ', async function () {
+      await comEth.addUser(alice.address);
+      await comEth.addUser(bob.address);
+      await comEth.addUser(eve.address);
+      await comEth.pay();
+      await comEth.connect(bob).pay();
+      expect(await comEth.getInvestmentBalance(comEth.address)).to.equal(ethers.utils.parseEther('0.2'));
+    });
+    it('should return investmentBalance', async function () {
+      await comEth.addUser(alice.address);
+      await comEth.addUser(bob.address);
+      await comEth.addUser(eve.address);
+      await comEth.pay();
+      await comEth.connect(bob).pay();
       expect(await comEth.getInvestmentBalance(alice.address)).to.equal(ethers.utils.parseEther('0.1'));
     });
   });
