@@ -4,7 +4,6 @@
 /* eslint-disable no-unused-vars */
 
 const { expect } = require('chai');
-const { LogDescription } = require('ethers/lib/utils');
 
 /* 
 addUser -OK
@@ -14,15 +13,14 @@ vote -OK
 proposalById -OK
 toggleIsActive -OK
 getIsBanned -OK
+getInvestmentBalance
 
 getProposalsList
-getInvestmentBalance
 getBalance
 quitComEth 
 
 
 */
-
 
 /* on teste les fonctions du Contrat ComEth */
 describe('ComEth', function () {
@@ -39,11 +37,11 @@ describe('ComEth', function () {
     await comEth.deployed();
   });
   describe('Getters / modifiers /user-statements', function () {
-    // test des differents modifiers , des fonctions get sont mis en place 
-    // les variables d'etat ont les proprietes de la struct User du smartContrat 
+    // test des differents modifiers , des fonctions get sont mis en place
+    // les variables d'etat ont les proprietes de la struct User du smartContrat
 
     it('should return if hasPaid is true', async function () {
-      // 
+      //
       await comEth.addUser(bob.address);
       await comEth.connect(bob).pay();
       expect(await comEth.getHasPaid(bob.address)).to.equal(true);
@@ -202,33 +200,48 @@ describe('ComEth', function () {
         .to.emit(comEth, 'Voted')
         .withArgs(bob.address, 1, 'quel est votre choix ?');
     });
+    it('should revert if already voted', async function () {
+      await comEth.connect(alice).addUser(bob.address);
+      await comEth.connect(bob).pay();
+      await comEth
+        .connect(bob)
+        .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0'));
+      await comEth.connect(bob).vote(1, 1);
+      await expect(comEth.connect(bob).vote(1, 1)).to.be.revertedWith('ComEth: Already voted');
+    });
     it('should revert if isActive', async function () {
       await comEth.connect(alice).addUser(bob.address);
       await comEth.connect(bob).pay();
       await comEth.connect(bob).toggleIsActive();
-      await expect(
-        comEth
-          .connect(bob)
-          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
-      ).to.be.revertedWith('Cometh: user is not active');
+      await expect(comEth.connect(bob).vote(1, 1)).to.be.revertedWith('Cometh: user is not active');
     });
     it('should revert if hasPaid', async function () {
       await comEth.addUser(eve.address);
-      await expect(
-        comEth
-          .connect(eve)
-          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, bob.address, ethers.utils.parseEther('0.01'))
-      ).to.be.revertedWith('Cometh: user has not paid subscription');
+      await expect(comEth.connect(eve).vote(1, 1)).to.be.revertedWith('Cometh: user has not paid subscription');
     });
     it('should revert if isBanned', async function () {
       await comEth.addUser(eve.address);
       await comEth.connect(eve).pay();
       await comEth.toggleIsBanned(eve.address);
-      await expect(
-        comEth
-          .connect(eve)
-          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, bob.address, ethers.utils.parseEther('0.01'))
-      ).to.be.revertedWith('Cometh: user is banned');
+      await expect(comEth.connect(eve).vote(1, 1)).to.be.revertedWith('Cometh: user is banned');
+    });
+    it('should revert with ComEth: Not a running proposal', async function () {
+      await comEth.addUser(alice.address);
+      await comEth.addUser(bob.address);
+      await comEth.addUser(eve.address);
+      await comEth.connect(bob).pay();
+      await comEth.pay();
+      await comEth.submitProposal(
+        ['A', 'B', 'C'],
+        'quel est votre choix ?',
+        900,
+        eve.address,
+        ethers.utils.parseEther('0')
+      );
+      await ethers.provider.send('evm_increaseTime', [1000]);
+      await ethers.provider.send('evm_mine');
+      await comEth.connect(alice).vote(1, 1);
+      await expect(comEth.connect(bob).vote(1, 1)).to.be.revertedWith('ComEth: Not a running proposal');
     });
   });
   describe('proposalsByID', function () {
@@ -375,25 +388,6 @@ describe('ComEth', function () {
       expect(res.statusVote).to.equal(2);
     });
     it('should return proposal[id].statusVote is Rejected', async function () {
-        await comEth.addUser(alice.address);
-        await comEth.addUser(bob.address);
-        await comEth.addUser(eve.address);
-        await comEth.connect(bob).pay();
-        await comEth.pay();
-        await comEth.submitProposal(
-          ['A', 'B', 'C'],
-          'quel est votre choix ?',
-          900,
-          eve.address,
-          ethers.utils.parseEther('0')
-        );
-        await ethers.provider.send('evm_increaseTime', [1000]);
-        await ethers.provider.send('evm_mine');
-        await comEth.connect(alice).vote(1, 1);
-        const res = await comEth.proposalById(1);
-        expect(res.statusVote).to.equal(3);
-      });
-    it('should revert with ComEth: Not a running proposal', async function () {
       await comEth.addUser(alice.address);
       await comEth.addUser(bob.address);
       await comEth.addUser(eve.address);
@@ -409,7 +403,8 @@ describe('ComEth', function () {
       await ethers.provider.send('evm_increaseTime', [1000]);
       await ethers.provider.send('evm_mine');
       await comEth.connect(alice).vote(1, 1);
-      await expect(comEth.connect(bob).vote(1, 1)).to.be.revertedWith('ComEth: Not a running proposal');
+      const res = await comEth.proposalById(1);
+      expect(res.statusVote).to.equal(3);
     });
   });
 });
