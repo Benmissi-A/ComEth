@@ -182,6 +182,7 @@ contract ComEth is AccessControl {
             _users[msg.sender].unpaidSubscriptions = 1;
         }
         _users[msg.sender].hasPaid = true;
+        payable(msg.sender).transfer(_subscriptionPrice * _users[msg.sender].unpaidSubscriptions);
         emit Deposited(msg.sender, _subscriptionPrice * _users[msg.sender].unpaidSubscriptions);
     }
 
@@ -217,10 +218,12 @@ contract ComEth is AccessControl {
             }
         }
     }
+
     function toggleIsBanned(address userAddress_) public {
-       require(msg.sender == _comEthOwner, "ComEth: You are not allowed to bann users.");
+        require(msg.sender == _comEthOwner, "ComEth: You are not allowed to bann users.");
         _toggleIsBanned(userAddress_);
     }
+
     function _toggleIsBanned(address userAddress_) private returns (bool) {
         if (_users[userAddress_].isBanned == false) {
             _users[userAddress_].isBanned = true;
