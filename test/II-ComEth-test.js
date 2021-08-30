@@ -6,12 +6,13 @@
 const { expect } = require('chai');
 
 /* 
+addUser
+pay
+submitProposal
 proposalById
 getProposalsList
 vote
 toggleIsActive
-addUser
-pay
 quitComEth
 getIsBanned
 getInvestmentBalance
@@ -47,6 +48,11 @@ describe('ComEth', function () {
       await comEth.addUser(alice.address);
       await comEth.pay();
       expect(await comEth.getInvestmentBalance(alice.address)).to.equal(subscriptionPrice);
+    });
+    it('should revert if already pay', async function () {
+      await comEth.addUser(alice.address);
+      await comEth.pay();
+     await expect( comEth.pay()).to.be.revertedWith('ComEth: You have already paid your subscription for this month.');
     });
   });
   describe('Submit Proposal', function () {
