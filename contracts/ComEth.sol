@@ -217,7 +217,10 @@ contract ComEth is AccessControl {
             }
         }
     }
-
+    function toggleIsBanned(address userAddress_) public {
+       require(msg.sender == _comEthOwner, "ComEth: You are not allowed to bann users.");
+        _toggleIsBanned(userAddress_);
+    }
     function _toggleIsBanned(address userAddress_) private returns (bool) {
         if (_users[userAddress_].isBanned == false) {
             _users[userAddress_].isBanned = true;

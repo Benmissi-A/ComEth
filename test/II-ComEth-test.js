@@ -121,15 +121,20 @@ describe('ComEth', function () {
       ).to.be.revertedWith('Cometh: user is not active');
     });
     it('should revert if isBanned', async function () {
-      await comEth.connect(alice).addUser(bob.address);
-      await comEth.connect(bob).pay();
-      await ethers.provider.send('evm_increaseTime', [2629800]);
-      await ethers.provider.send('evm_mine');
-      await comEth.handleCycle();
+      await comEth.addUser(eve.address);
+      await comEth.connect(eve).pay();
+      await comEth.toggleIsBanned(eve.address);
+
       await expect(
         comEth
-          .connect(bob)
-          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
+          .connect(eve)
+          .submitProposal(
+            ['A', 'B', 'C'],
+            'quel est votre choix ?',
+            900,
+            alice.address,
+            ethers.utils.parseEther('0.01')
+          )
       ).to.be.revertedWith('Cometh: user is banned');
     });
     it('should revert if hasPaid', async function () {
@@ -146,10 +151,10 @@ describe('ComEth', function () {
       await comEth.addUser(alice.address);
       await comEth.pay();
       await comEth.submitProposal(
-        ['one', 'two', 'Frééé'],
-        'qui sont les meilleurs',
+        ['A', 'B', 'C'],
+        'quel est votre choix ?',
         900,
-        eve.address,
+        bob.address,
         ethers.utils.parseEther('0.01')
       );
       await comEth.addUser(bob.address);
@@ -157,7 +162,35 @@ describe('ComEth', function () {
 
       await expect(comEth.connect(bob).vote(1, 1))
         .to.emit(comEth, 'Voted')
-        .withArgs(bob.address, 1, 'qui sont les meilleurs');
+        .withArgs(bob.address, 1, 'quel est votre choix ?');
+    });
+    it('should revert if isActive', async function () {
+      await comEth.connect(alice).addUser(bob.address);
+      await comEth.connect(bob).pay();
+      await comEth.connect(bob).toggleIsActive();
+      await expect(
+        comEth
+          .connect(bob)
+          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
+      ).to.be.revertedWith('Cometh: user is not active');
+    });
+    it('should revert if hasPaid', async function () {
+      await comEth.addUser(eve.address);
+      await expect(
+        comEth
+          .connect(eve)
+          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, bob.address, ethers.utils.parseEther('0.01'))
+      ).to.be.revertedWith('Cometh: user has not paid subscription');
+    });
+    it('should revert if isBanned', async function () {
+      await comEth.addUser(eve.address);
+      await comEth.connect(eve).pay();
+      await comEth.toggleIsBanned(eve.address);
+      await expect(
+        comEth
+          .connect(eve)
+          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, bob.address, ethers.utils.parseEther('0.01'))
+      ).to.be.revertedWith('Cometh: user is banned');
     });
   });
 });
