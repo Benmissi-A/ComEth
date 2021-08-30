@@ -148,7 +148,7 @@ contract ComEth is AccessControl {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function toggleIsActive() public returns (bool) {
+    function toggleIsActive() public isNotBanned returns (bool) {
         if (_users[msg.sender].isActive == false) {
             _users[msg.sender].isActive = true;
         } else {
