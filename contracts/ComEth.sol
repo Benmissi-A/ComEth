@@ -182,7 +182,7 @@ contract ComEth is AccessControl {
             _users[msg.sender].unpaidSubscriptions = 1;
         }
         _users[msg.sender].hasPaid = true;
-        payable(msg.sender).transfer(_subscriptionPrice * _users[msg.sender].unpaidSubscriptions);
+       // payable(msg.sender).transfer(_subscriptionPrice * _users[msg.sender].unpaidSubscriptions);
         emit Deposited(msg.sender, _subscriptionPrice * _users[msg.sender].unpaidSubscriptions);
     }
 
