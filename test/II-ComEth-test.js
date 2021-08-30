@@ -56,23 +56,58 @@ describe('ComEth', function () {
     });
   });
   describe('Submit Proposal', function () {
-    it('it submit proposal', async function () {
+    it('should emmit ProposalCreated', async function () {
       await comEth.connect(alice).addUser(bob.address);
       await comEth.connect(bob).pay();
       await expect(
         comEth
           .connect(bob)
-          .submitProposal(
-            ['one', 'two', 'Frééé'],
-            'qui sont les meilleurs',
-            900,
-            eve.address,
-            ethers.utils.parseEther('0.01')
-          )
+          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
       )
         .to.emit(comEth, 'ProposalCreated')
-        .withArgs(1, 'qui sont les meilleurs');
+        .withArgs(1, 'quel est votre choix ?');
     });
+    it('should revert if isActive', async function () {
+      await comEth.connect(alice).addUser(bob.address);
+      await comEth.connect(bob).pay();
+      await comEth.connect(bob).toggleIsActive();
+      await expect(
+        comEth
+          .connect(bob)
+          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
+      ).to.be.revertedWith('Cometh: user is not active');
+    });
+        it('should revert if isBanned', async function () {
+          await comEth.connect(alice).addUser(bob.address);
+          await comEth.connect(bob).pay();
+          await ethers.provider.send('evm_increaseTime', [3600*24*15]);
+          await ethers.provider.send('evm_mine');
+          await expect(
+            comEth
+              .connect(bob)
+              .submitProposal(
+                ['A', 'B', 'C'],
+                'quel est votre choix ?',
+                900,
+                eve.address,
+                ethers.utils.parseEther('0.01')
+              )
+          ).to.be.revertedWith('Cometh: user is banned');
+        });
+            it('should revert if hasPaid', async function () {
+              await comEth.connect(alice).addUser(bob.address);
+              await expect(
+                comEth
+                  .connect(bob)
+                  .submitProposal(
+                    ['A', 'B', 'C'],
+                    'quel est votre choix ?',
+                    900,
+                    eve.address,
+                    ethers.utils.parseEther('0.01')
+                  )
+              ).to.be.revertedWith('Cometh: user has not paid subscription');
+            });
   });
   describe('Vote', function () {
     it('should emit Voted', async function () {

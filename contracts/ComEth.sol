@@ -91,7 +91,7 @@ contract ComEth is AccessControl {
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
-    ) public isActive isNotBanned hasPaid returns (uint256) {
+    ) public isNotBanned isActive hasPaid returns (uint256) {
         _handleCycle();
         _id.increment();
         uint256 id = _id.current();
@@ -228,12 +228,28 @@ contract ComEth is AccessControl {
         return _users[userAddress_].isBanned;
     }
 
+    function getIsActive(address userAddress_) public view returns (bool) {
+        return _users[userAddress_].isActive;
+    }
+
+    function getHasPaid(address userAddress_) public view returns (bool) {
+        return _users[userAddress_].hasPaid;
+    }
+
     function getInvestmentBalance(address userAddress_) public view returns (uint256) {
         return _investMentBalances[userAddress_];
     }
 
     function getBalance() public view returns (uint256) {
         return address(this).balance;
+    }
+
+    function getCycle() public view returns (uint256) {
+        return _cycleStart;
+    }
+
+    function getTime() public view returns (uint256) {
+        return block.timestamp;
     }
     /*  
         - Créer rôles
