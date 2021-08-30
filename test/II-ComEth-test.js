@@ -7,31 +7,43 @@ const { expect } = require('chai');
 const { LogDescription } = require('ethers/lib/utils');
 
 /* 
-addUser
-pay
-submitProposal
-proposalById
+addUser -OK
+pay -OK
+submitProposal -OK
+vote -OK
+proposalById -OK
+toggleIsActive -OK
+getIsBanned -OK
+
 getProposalsList
-vote
-toggleIsActive
-quitComEth
-getIsBanned
 getInvestmentBalance
 getBalance
+quitComEth 
+
+
 */
 
+
+/* on teste les fonctions du Contrat ComEth */
 describe('ComEth', function () {
+  // la liste des signers qui seront utilisés dans les tests
   let ComEth, comEth, alice, bob, eve;
+  // tarif des cotisations fixe determine au lancement du smartContract
   const subscriptionPrice = ethers.utils.parseEther('0.1');
 
   this.beforeEach(async function () {
+    // avant chaque test on deploie comet avec alice comme owner user par defaut
     [dev, alice, bob, eve] = await ethers.getSigners();
     ComEth = await ethers.getContractFactory('ComEth');
     comEth = await ComEth.connect(alice).deploy(alice.address, subscriptionPrice);
     await comEth.deployed();
   });
-  describe('Getters / modifiers /user_statements', function () {
+  describe('Getters / modifiers /user-statements', function () {
+    // test des differents modifiers , des fonctions get sont mis en place 
+    // les variables d'etat ont les proprietes de la struct User du smartContrat 
+
     it('should return if hasPaid is true', async function () {
+      // 
       await comEth.addUser(bob.address);
       await comEth.connect(bob).pay();
       expect(await comEth.getHasPaid(bob.address)).to.equal(true);
@@ -363,6 +375,25 @@ describe('ComEth', function () {
       expect(res.statusVote).to.equal(2);
     });
     it('should return proposal[id].statusVote is Rejected', async function () {
+        await comEth.addUser(alice.address);
+        await comEth.addUser(bob.address);
+        await comEth.addUser(eve.address);
+        await comEth.connect(bob).pay();
+        await comEth.pay();
+        await comEth.submitProposal(
+          ['A', 'B', 'C'],
+          'quel est votre choix ?',
+          900,
+          eve.address,
+          ethers.utils.parseEther('0')
+        );
+        await ethers.provider.send('evm_increaseTime', [1000]);
+        await ethers.provider.send('evm_mine');
+        await comEth.connect(alice).vote(1, 1);
+        const res = await comEth.proposalById(1);
+        expect(res.statusVote).to.equal(3);
+      });
+    it('should revert with ComEth: Not a running proposal', async function () {
       await comEth.addUser(alice.address);
       await comEth.addUser(bob.address);
       await comEth.addUser(eve.address);
@@ -375,28 +406,10 @@ describe('ComEth', function () {
         eve.address,
         ethers.utils.parseEther('0')
       );
-      await comEth.connect(bob).vote(1, 1);
       await ethers.provider.send('evm_increaseTime', [1000]);
       await ethers.provider.send('evm_mine');
-      const res = await comEth.proposalById(1);
-      expect(res.statusVote).to.equal(3);
-    });
-    it('should return proposal[id].statusVote is Rejected', async function () {
-      await comEth.addUser(alice.address);
-      await comEth.addUser(bob.address);
-      await comEth.addUser(eve.address);
-      await comEth.connect(bob).pay();
-      await comEth.pay();
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0')
-      );
-      await ethers.provider.send('evm_increaseTime', [1000]);
-      await ethers.provider.send('evm_mine');
-      await expect(comEth.connect(bob).vote(1, 1)).to.revertedWith('ComEth: Not a running proposal');
+      await comEth.connect(alice).vote(1, 1);
+      await expect(comEth.connect(bob).vote(1, 1)).to.be.revertedWith('ComEth: Not a running proposal');
     });
   });
 });
