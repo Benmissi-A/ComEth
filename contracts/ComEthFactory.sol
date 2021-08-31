@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ComEthFactory is Ownable {
     ComEth[] private _comEthAddresses;
     address private _factoryOwner;
-    event ComEthCreated(address comEthAddress, address indexed comEthOwner);
+    event ComEthCreated(address indexed comEthAddress, address indexed comEthOwner);
 
     constructor(address factoryOwner_) {
         _factoryOwner = factoryOwner_;
