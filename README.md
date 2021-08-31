@@ -22,7 +22,7 @@ yarn
 
 
 
-### You need to add at your environment a file neme .env :
+### You need to add at your environment a file .env :
 
 ```
 INFURA_PROJECT_ID=""
