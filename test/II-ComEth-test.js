@@ -5,7 +5,7 @@
 
 const { expect } = require('chai');
 
-/* 
+/*
 addUser -OK
 pay -OK
 submitProposal -OK
@@ -17,8 +17,7 @@ getInvestmentBalance
 
 getProposalsList
 getBalance
-quitComEth 
-
+quitComEth
 
 */
 
@@ -113,8 +112,10 @@ describe('ComEth', function () {
       await comEth.addUser(alice.address);
       await comEth.addUser(bob.address);
       await comEth.addUser(eve.address);
-      await comEth.pay();
-      await comEth.connect(bob).pay();
+      const tx = await comEth.pay();
+      tx.wait();
+      const tx2 = await comEth.connect(bob).pay();
+      tx2.wait();
       expect(await comEth.getBalance()).to.equal(0);
     });
     it('should return investmentBalance[comEth.address] ', async function () {
