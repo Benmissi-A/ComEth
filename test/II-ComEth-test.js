@@ -113,9 +113,9 @@ describe('ComEth', function () {
       await comEth.addUser(bob.address);
       await comEth.addUser(eve.address);
       const tx = await comEth.pay();
-      tx.wait();
-      const tx2 = await comEth.connect(bob).pay();
-      tx2.wait();
+      await tx.wait();
+      const tx1 = await comEth.connect(bob).pay();
+      await tx1.wait();
       expect(await comEth.getBalance()).to.equal(0);
     });
     it('should return investmentBalance[comEth.address] ', async function () {
