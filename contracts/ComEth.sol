@@ -21,6 +21,7 @@ contract ComEth is AccessControl {
         bool isBanned;
         bool hasPaid;
         bool isActive;
+        bool exists;
         uint256 unpaidSubscriptions;
     }
 
@@ -76,6 +77,11 @@ contract ComEth is AccessControl {
         _;
     }
 
+    modifier exists() {
+        require(_users[msg.sender].exists == true, "ComEth: you are not a member of this ComEth.");
+        _;
+    }
+
     constructor(address comEthOwner_, uint256 subscriptionPrice_) {
         _comEthOwner = comEthOwner_;
         _subscriptionPrice = subscriptionPrice_;
@@ -87,7 +93,7 @@ contract ComEth is AccessControl {
         _deposit();
     }
 
-    function handleCycle() public {
+    function handleCycle() public exists {
         _handleCycle();
     }
 
@@ -97,7 +103,7 @@ contract ComEth is AccessControl {
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
-    ) public isNotBanned isActive hasPaid returns (uint256) {
+    ) public exists isNotBanned isActive hasPaid returns (uint256) {
         _handleCycle();
         _id.increment();
         uint256 id = _id.current();
@@ -118,15 +124,15 @@ contract ComEth is AccessControl {
         return id;
     }
 
-    function proposalById(uint256 id_) public view returns (Proposal memory) {
+    function proposalById(uint256 id_) public view exists returns (Proposal memory) {
         return _proposals[id_];
     }
 
-    function getProposalsList() public view returns (Proposal[] memory) {
+    function getProposalsList() public view exists returns (Proposal[] memory) {
         return _proposalsList;
     }
 
-    function vote(uint256 id_, uint256 userChoice_) public isNotBanned hasPaid isActive {
+    function vote(uint256 id_, uint256 userChoice_) public exists isNotBanned hasPaid isActive {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
@@ -154,7 +160,7 @@ contract ComEth is AccessControl {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function toggleIsActive() public isNotBanned returns (bool) {
+    function toggleIsActive() public exists isNotBanned returns (bool) {
         if (_users[msg.sender].isActive == false) {
             _users[msg.sender].isActive = true;
         } else {
@@ -163,17 +169,18 @@ contract ComEth is AccessControl {
         return _users[msg.sender].isActive;
     }
 
-    function addUser(address userAddress_) public {
-        require(msg.sender == _comEthOwner, "ComEth: You are not allowed to add users.");
-        _users[userAddress_] = User({
-            userAddress: userAddress_,
+    function addUser() public {
+        require(_users[msg.sender].exists != true, "ComEth: already an user");
+        _users[msg.sender] = User({
+            userAddress: msg.sender,
             isBanned: false,
             hasPaid: false,
             isActive: true,
+            exists: true,
             unpaidSubscriptions: 1
         });
-        _usersList.push(_users[userAddress_]);
-        emit UserAdded(userAddress_);
+        _usersList.push(_users[msg.sender]);
+        emit UserAdded(msg.sender);
     }
 
     function _deposit() private {
@@ -193,16 +200,16 @@ contract ComEth is AccessControl {
         payable(msg.sender).sendValue(amount);
         emit Withdrawn(msg.sender, amount);
     }
-
-    function pay() external payable {
+    /// msg.Value will be calculated in the front part and equal getPaymentAmount(msg.sender)
+    function pay() external payable exists {
         require(_users[msg.sender].hasPaid == false, "ComEth: You have already paid your subscription for this month.");
         _deposit();
     }
 
-    function quitComEth() public {
-        if (!_users[msg.sender].isBanned) {
+    function quitComEth() public exists {
+        require(!_users[msg.sender].isBanned, "ComEth: You must sort out your subscriptions using the payment function before you leave.");
             _withdraw();
-        }
+            _users[msg.sender].exists = false;
     }
 
     function _handleCycle() private {
@@ -221,12 +228,12 @@ contract ComEth is AccessControl {
         }
     }
 
-    function toggleIsBanned(address userAddress_) public {
+    function toggleIsBanned(address userAddress_) public exists {
         require(msg.sender == _comEthOwner, "ComEth: You are not allowed to bann users.");
         _toggleIsBanned(userAddress_);
     }
 
-    function _toggleIsBanned(address userAddress_) private returns (bool) {
+    function _toggleIsBanned(address userAddress_) private exists returns (bool) {
         if (_users[userAddress_].isBanned == false) {
             _users[userAddress_].isBanned = true;
         } else {
@@ -236,42 +243,47 @@ contract ComEth is AccessControl {
         return _users[userAddress_].isBanned;
     }
 
-    function getIsBanned(address userAddress_) public view returns (bool) {
+    function getIsBanned(address userAddress_) public view exists returns (bool) {
         return _users[userAddress_].isBanned;
     }
 
-    function getIsActive(address userAddress_) public view returns (bool) {
+    function getIsActive(address userAddress_) public view exists returns (bool) {
         return _users[userAddress_].isActive;
     }
 
-    function getHasPaid(address userAddress_) public view returns (bool) {
+    function getHasPaid(address userAddress_) public view exists returns (bool) {
         return _users[userAddress_].hasPaid;
     }
 
-    function getInvestmentBalance(address userAddress_) public view returns (uint256) {
+    function getInvestmentBalance(address userAddress_) public view exists returns (uint256) {
         return _investMentBalances[userAddress_];
     }
 
-    function getBalance() public view returns (uint256) {
+    function getBalance() public view exists returns (uint256) {
         return address(this).balance;
     }
 
-    function getCycle() public view returns (uint256) {
+    function getCycle() public view exists returns (uint256) {
         return _cycleStart;
     }
 
-    function getTime() public view returns (uint256) {
+    function getTime() public view exists returns (uint256) {
         return block.timestamp;
     }
+
+    function getSubscriptionPrice() public view exists returns (uint256) {
+        return _subscriptionPrice;
+    }
+
+    function getUnpaidSubscriptions(address userAddress) public view exists returns (uint256) {
+        return _users[userAddress].unpaidSubscriptions;
+    } 
+
+    function getAmountToBePaid(address userAddress) public view exists returns (uint256) {
+        return _subscriptionPrice * _users[userAddress].unpaidSubscriptions;
+    }
     /*  
-        - Créer rôles
-        - Voter rôles / élections
-        - Etoffer les options de vote (bannir, ...)
-        - Gérer cotisations : cycles?
-        - Gérer transactions en token
-        - Getteurs
-        - Ajouter modifiers
-        - Sortie d'un user de la DAO + remboursement eventuel
-        - fermeture de comEth + répartition du pot commun restant 
+        - Gérer transactions en token ?
+        - Créer token de gouvernance?
      */
 }
