@@ -46,8 +46,7 @@ contract ComEth is AccessControl {
     Proposal[] private _proposalsList;
     Counters.Counter private _id;
     uint256 private _cycleStart;
-
-    //mapping(address => uint256) _userTimeStamp;
+    uint private _majority;
 
     mapping(address => uint256) private _investMentBalances;
     mapping(address => User) private _users;
