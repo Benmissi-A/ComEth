@@ -19,7 +19,7 @@
     "eslint-plugin-standard": "^5.0.0",
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.4.6",
-    "hardhat": "^2.3.3",
+    "hardhat": "^2.6.2",
     "hardhat-docgen": "^1.1.1",
     "prettier": "^2.3.1",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
@@ -29,6 +29,7 @@
   "repository": "https://github.com/Benmissi-A/ComEth.git",
   "author": "Benmissi-A LokiDieKatze GuillaumeB75 Stella Soler",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.2.0"
+    "@openzeppelin/contracts": "^4.2.0",
+    "n": "^7.3.1"
   }
 }
