@@ -83,6 +83,7 @@ contract ComEth is AccessControl {
         require(_userExists[msg.sender] == true, "ComEth: User is not part of the ComEth");
         _;
     }
+    
     modifier CheckSubscription() {
           if (block.timestamp > _cycleStart + _subscriptionTimeCycle) {
                _cycleStart = _cycleStart + _subscriptionTimeCycle;            
@@ -94,9 +95,8 @@ contract ComEth is AccessControl {
                     _users[msg.sender].unpaidSubscriptions += 1;
                 }
                 _users[msg.sender].hasPaid = false;
-            }
-          
-        require(_userTimeStamp[msg.sender] == true, "ComEth: User is not part of the ComEth");
+            }     
+        require(_userTimeStamp[msg.sender] < _cycleStart , "ComEth: You need to pay your subscription(s)");
         _;
     }
 
@@ -130,18 +130,13 @@ contract ComEth is AccessControl {
         _deposit();
     }
 
-    // function handleCycle() public {
-    //     _handleCycle();
-    // }
-
     function submitProposal(
         string[] memory voteOptions_,
         string memory proposition_,
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
-    ) public isNotBanned isActive hasPaid returns (uint256) {
-       // _handleCycle();
+    ) public CheckSubscription isNotBanned isActive hasPaid returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
 
@@ -169,7 +164,7 @@ contract ComEth is AccessControl {
         return _proposalsList;
     }
 
-    function vote(uint256 id_, uint256 userChoice_) public isNotBanned hasPaid isActive {
+    function vote(uint256 id_, uint256 userChoice_) public CheckSubscription isNotBanned hasPaid isActive {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
@@ -197,7 +192,7 @@ contract ComEth is AccessControl {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function toggleIsActive() public isNotBanned returns (bool) {
+    function toggleIsActive() public CheckSubscription isNotBanned returns (bool) {
         if (_users[msg.sender].isActive == false) {
             _users[msg.sender].isActive = true;
         } else {
@@ -239,6 +234,7 @@ contract ComEth is AccessControl {
 
     function pay() external payable {
         require(_users[msg.sender].hasPaid == false, "ComEth: You have already paid your subscription for this month.");
+        _userTimeStamp[msg.sender] = _cycleStart;
         _deposit();
     }
 
