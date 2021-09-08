@@ -41,36 +41,45 @@ describe('ComEth', function () {
 
     it('should return if hasPaid is true', async function () {
       //
-      await comEth.addUser(bob.address);
-      await comEth.connect(bob).pay();
-      expect(await comEth.getHasPaid(bob.address)).to.equal(true);
+      await comEth.connect(bob).addUser();
+      await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.1') });
+      const tx = await comEth.getUser(bob.address);
+      expect(tx.hasPaid).to.equal(true);
     });
     it('should return if hasPaid is false', async function () {
-      await comEth.addUser(eve.address);
-      expect(await comEth.getHasPaid(bob.address)).to.equal(false);
+      await comEth.connect(eve).addUser();
+      const tx = await comEth.getUser(eve.address);
+      expect(tx.hasPaid).to.equal(false);
     });
     it('should return if isBanned is false', async function () {
-      await comEth.addUser(bob.address);
-      await comEth.connect(bob).pay();
-      expect(await comEth.getIsBanned(bob.address)).to.equal(false);
+      await comEth.connect(bob).addUser();
+      await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.1') });
+      const tx = await comEth.getUser(bob.address);
+      expect(tx.isBanned).to.equal(false);
     });
     it('should return if isBanned is false when cycle is not elapsed', async function () {
-      await comEth.addUser(bob.address);
-      expect(await comEth.getIsBanned(bob.address)).to.equal(false);
+      await comEth.connect(bob).addUser();
+      await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.1') });
+      const tx = await comEth.getUser(bob.address);
+      expect(tx.isBanned).to.equal(false);
     });
     it('should return if isBanned is not active when cycle is elapsed', async function () {
-      await comEth.addUser(bob.address);
+      await comEth.connect(bob).addUser();
       await comEth.connect(bob).toggleIsActive();
       await ethers.provider.send('evm_increaseTime', [3600 * 24 * 15]);
       await ethers.provider.send('evm_mine');
-      expect(await comEth.getIsBanned(bob.address)).to.equal(false);
+      expect(tx.isBanned).to.equal(false);
     });
     it('should return if isBanned is true', async function () {
-      await comEth.addUser(eve.address);
+      await comEth.connect(eve).addUser();
       await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
-      await comEth.handleCycle();
-      expect(await comEth.getIsBanned(eve.address)).to.equal(true);
+
+      comEth
+        .connect(eve)
+        .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'));
+      const tx = await comEth.getUser(eve.address);
+      expect(tx.isBanned).to.equal(true);
     });
   });
   describe('addUsers', function () {
@@ -112,11 +121,11 @@ describe('ComEth', function () {
       await comEth.addUser(alice.address);
       await comEth.addUser(bob.address);
       await comEth.addUser(eve.address);
-      const tx = await comEth.pay();
+      const tx = await comEth.pay({ from: alice.address, value: ethers.utils.parseEther('0.1') });
       await tx.wait();
-      const tx1 = await comEth.connect(bob).pay();
+      const tx1 = await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.1') });
       await tx1.wait();
-      expect(await comEth.getBalance()).to.equal(0);
+      expect(await comEth.getBalance()).to.equal({ from: addr1, value: ethers.utils.parseEther('0.2') });
     });
     it('should return investmentBalance[comEth.address] ', async function () {
       await comEth.addUser(alice.address);
