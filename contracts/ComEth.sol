@@ -49,7 +49,6 @@ contract ComEth is AccessControl {
 
     mapping(address => uint256) private _userTimeStamp;
 
-    mapping(address => bool) private _userExists;
     mapping(address => User) private _users;
 
     mapping(address => uint256) private _investMentBalances;
@@ -81,7 +80,7 @@ contract ComEth is AccessControl {
     }
 
     modifier userExist() {
-        require(_userExists[msg.sender] == true, "ComEth: User is not part of the ComEth");
+        require(_users[msg.sender].exists == true, "ComEth: User is not part of the ComEth");
         _;
     }
 
@@ -189,7 +188,6 @@ contract ComEth is AccessControl {
 
     function addUser() public {
         require(!_users[msg.sender].exists, "ComEth: already an user");
-        _userExists[msg.sender] = true;
         _users[msg.sender] = User({
             userAddress: msg.sender,
             isBanned: false,
@@ -252,7 +250,9 @@ contract ComEth is AccessControl {
         emit IsBanned(userAddress_, _users[userAddress_].isBanned);
         return _users[userAddress_].isBanned;
     }
-
+    function getUser(address useAddress_) public view returns(User memory){
+        return _users[useAddress_];
+    }
     function getIsBanned(address userAddress_) public view returns (bool) {
         return _users[userAddress_].isBanned;
     }
