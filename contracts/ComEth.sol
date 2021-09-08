@@ -189,6 +189,7 @@ contract ComEth is AccessControl {
 
     function addUser() public {
         require(!_users[msg.sender].exists, "ComEth: already an user");
+        _userExists[msg.sender] = true;
         _users[msg.sender] = User({
             userAddress: msg.sender,
             isBanned: false,
