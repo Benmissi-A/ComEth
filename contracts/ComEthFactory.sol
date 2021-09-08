@@ -8,9 +8,10 @@ pragma solidity ^0.8.0;
  */
 
 import "./ComEth.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+//import "@openzeppelin/contracts/access/Ownable.sol";
+// not forget to add isOwnable !!!
 
-contract ComEthFactory is Ownable {
+contract ComEthFactory {
     ComEth[] private _comEthAddresses;
     address private _factoryOwner;
     event ComEthCreated(address indexed comEthAddress, address indexed comEthOwner);
