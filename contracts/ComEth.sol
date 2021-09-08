@@ -292,6 +292,10 @@ contract ComEth is AccessControl {
     function getAmountToBePaid(address userAddress) public view returns (uint256) {
         return _subscriptionPrice * _users[userAddress].unpaidSubscriptions;
     }
+
+    function getActiveUsersNb() public view returns (uint256) {
+        return _nbActiveUsers;
+    }
     /*  
         - Gérer transactions en token ?
         - Créer token de gouvernance?
