@@ -250,8 +250,8 @@ contract ComEth is AccessControl {
         emit IsBanned(userAddress_, _users[userAddress_].isBanned);
         return _users[userAddress_].isBanned;
     }
-    function getUser(address useAddress_) public view returns(User memory){
-        return _users[useAddress_];
+    function getUser(address userAddress_) public view returns(User memory){
+        return _users[userAddress_];
     }
 
     function getInvestmentBalance(address userAddress_) public view returns (uint256) {
