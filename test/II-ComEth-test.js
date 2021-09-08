@@ -68,14 +68,14 @@ describe('ComEth', function () {
       await comEth.connect(bob).toggleIsActive();
       await ethers.provider.send('evm_increaseTime', [3600 * 24 * 15]);
       await ethers.provider.send('evm_mine');
-      expect(tx.isBanned).to.equal(false);
+      const tx = await comEth.getUser(bob.address);
+      expect(tx.isActive).to.equal(false);
     });
     it('should return if isBanned is true', async function () {
       await comEth.connect(eve).addUser();
       await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
-
-      comEth
+      await comEth
         .connect(eve)
         .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'));
       const tx = await comEth.getUser(eve.address);
