@@ -97,17 +97,17 @@ describe('ComEth', function () {
   describe('Pay', function () {
     it('has payed', async function () {
       await comEth.addUser();
-      await comEth.pay();
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       expect(await comEth.getInvestmentBalance(alice.address)).to.equal(subscriptionPrice);
     });
     it('should revert if already pay', async function () {
       await comEth.addUser();
-      await comEth.pay();
-      await expect(comEth.pay()).to.be.revertedWith('ComEth: You have already paid your subscription for this month.');
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+      await expect(comEth.pay({ value: ethers.utils.parseEther('0.1') })).to.be.revertedWith('ComEth: You have already paid your subscription for this month.');
     });
     it('should pay after a cycle', async function () {
       await comEth.addUser();
-      await comEth.pay();
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
       await comEth.handleCycle();
@@ -129,23 +129,23 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.pay();
-      await comEth.connect(bob).pay();
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       expect(await comEth.getInvestmentBalance(comEth.address)).to.equal(ethers.utils.parseEther('0.2'));
     });
     it('should return investmentBalance', async function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.pay();
-      await comEth.connect(bob).pay();
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       expect(await comEth.getInvestmentBalance(alice.address)).to.equal(ethers.utils.parseEther('0.1'));
     });
   });
   describe('Submit Proposal', function () {
     it('should emmit ProposalCreated', async function () {
       await comEth.connect(alice).addUser(bob.address);
-      await comEth.connect(bob).pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await expect(
         comEth
           .connect(bob)
@@ -156,7 +156,7 @@ describe('ComEth', function () {
     });
     it('should revert if isActive', async function () {
       await comEth.connect(alice).addUser(bob.address);
-      await comEth.connect(bob).pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.connect(bob).toggleIsActive();
       await expect(
         comEth
@@ -166,7 +166,7 @@ describe('ComEth', function () {
     });
     it('should revert if isBanned', async function () {
       await comEth.connect(eve).addUser();
-      await comEth.connect(eve).pay();
+      await comEth.connect(eve).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.toggleIsBanned(eve.address);
 
       await expect(
@@ -193,7 +193,7 @@ describe('ComEth', function () {
   describe('Vote', function () {
     it('should emit Voted', async function () {
       await comEth.addUser();
-      await comEth.pay();
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -202,7 +202,7 @@ describe('ComEth', function () {
         ethers.utils.parseEther('0.01')
       );
       await comEth.connect(bob).addUser();
-      await comEth.connect(bob).pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
 
       await expect(comEth.connect(bob).vote(1, 1))
         .to.emit(comEth, 'Voted')
@@ -210,7 +210,7 @@ describe('ComEth', function () {
     });
     it('should revert if already voted', async function () {
       await comEth.connect(alice).addUser(bob.address);
-      await comEth.connect(bob).pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth
         .connect(bob)
         .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0'));
@@ -219,7 +219,7 @@ describe('ComEth', function () {
     });
     it('should revert if isActive', async function () {
       await comEth.connect(alice).addUser(bob.address);
-      await comEth.connect(bob).pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.connect(bob).toggleIsActive();
       await expect(comEth.connect(bob).vote(1, 1)).to.be.revertedWith('Cometh: user is not active');
     });
@@ -229,7 +229,7 @@ describe('ComEth', function () {
     });
     it('should revert if isBanned', async function () {
       await comEth.connect(eve).addUser();
-      await comEth.connect(eve).pay();
+      await comEth.connect(eve).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.toggleIsBanned(eve.address);
       await expect(comEth.connect(eve).vote(1, 1)).to.be.revertedWith('Cometh: user is banned');
     });
@@ -237,8 +237,8 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(bob).pay();
-      await comEth.pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -257,7 +257,7 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(alice).pay();
+      await comEth.connect(alice).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -273,8 +273,8 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(bob).pay();
-      await comEth.pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -292,8 +292,8 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(bob).pay();
-      await comEth.pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -310,8 +310,8 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(bob).pay();
-      await comEth.pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -328,8 +328,8 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(bob).pay();
-      await comEth.pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -346,8 +346,8 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(bob).pay();
-      await comEth.pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -364,8 +364,8 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(bob).pay();
-      await comEth.pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -381,8 +381,8 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(bob).pay();
-      await comEth.pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
@@ -399,8 +399,8 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.connect(bob).pay();
-      await comEth.pay();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.submitProposal(
         ['A', 'B', 'C'],
         'quel est votre choix ?',
