@@ -40,7 +40,6 @@ describe('ComEth', function () {
     // les variables d'etat ont les proprietes de la struct User du smartContrat
 
     it('should return if hasPaid is true', async function () {
-   
       await comEth.connect(bob).addUser();
       const amount = await comEth.getAmountToBePaid(bob.address);
       console.log(amount.toString());
@@ -75,14 +74,15 @@ describe('ComEth', function () {
     });
     it('should revert if isBanned is true', async function () {
       await comEth.connect(eve).addUser();
+      await comEth.connect(eve).pay({ value: ethers.utils.parseEther('0.1') });
       await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
-      await comEth.connect(bob).addUser();
-      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.connect(bob).quitComEth();
       await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
-      await expect(comEth.connect(eve).toggleIsActive()).to.be.revertedWith('Cometh: user is banned');
+      await comEth.connect(eve).quitComEth();
+      const tx = await comEth.getUser(eve.address);
+      console.log(tx.isBanned);
+      expect(tx.isBanned).to.equal(true);
     });
   });
   describe('addUsers', function () {

@@ -238,7 +238,7 @@ contract ComEth {
         _deposit();
     }
 
-    function quitComEth() public userExist isNotBanned {
+    function quitComEth() public checkSubscription userExist isNotBanned {
         if(!_users[msg.sender].isBanned) {
             _withdraw();
         }
