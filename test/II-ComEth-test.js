@@ -119,11 +119,11 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      const tx = await comEth.pay({ from: alice.address, value: ethers.utils.parseEther('0.1') });
+      const tx = await comEth.pay({value: ethers.utils.parseEther('0.1') });
       await tx.wait();
-      const tx1 = await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.1') });
+      const tx1 = await comEth.connect(bob).pay({value: ethers.utils.parseEther('0.1') });
       await tx1.wait();
-      expect(await comEth.getBalance()).to.equal({ from: addr1, value: ethers.utils.parseEther('0.2') });
+      expect(await comEth.getBalance()).to.equal(ethers.utils.parseEther('0.2'));
     });
     it('should return investmentBalance[comEth.address] ', async function () {
       await comEth.addUser();
