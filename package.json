@@ -30,7 +30,7 @@
   "repository": "https://github.com/Benmissi-A/ComEth.git",
   "author": "Benmissi-A LokiDieKatze GuillaumeB75 Stella Soler",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.2.0",
+    "@openzeppelin/contracts": "^4.3.1",
     "n": "^7.3.1"
   }
 }
