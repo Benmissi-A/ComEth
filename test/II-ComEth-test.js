@@ -101,7 +101,9 @@ describe('ComEth', function () {
     it('should revert if already pay', async function () {
       await comEth.addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await expect(comEth.pay({ value: ethers.utils.parseEther('0.1') })).to.be.revertedWith('ComEth: You have already paid your subscription for this month.');
+      await expect(comEth.pay({ value: ethers.utils.parseEther('0.1') })).to.be.revertedWith(
+        'ComEth: You have already paid your subscription for this month.'
+      );
     });
     it('should pay after a cycle', async function () {
       await comEth.addUser();
@@ -117,9 +119,9 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      const tx = await comEth.pay({value: ethers.utils.parseEther('0.1') });
+      const tx = await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await tx.wait();
-      const tx1 = await comEth.connect(bob).pay({value: ethers.utils.parseEther('0.1') });
+      const tx1 = await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await tx1.wait();
       expect(await comEth.getBalance()).to.equal(ethers.utils.parseEther('0.2'));
     });
