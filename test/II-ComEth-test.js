@@ -64,7 +64,6 @@ describe('ComEth', function () {
       expect(tx.isBanned).to.equal(false);
     });
     it('should return if isActive when cycle is elapsed', async function () {
-
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).toggleIsActive();
       /* await ethers.provider.send('evm_increaseTime', [3600 * 24 * 15]);
