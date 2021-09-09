@@ -59,27 +59,28 @@ describe('ComEth', function () {
     });
     it('should return if isBanned is false when cycle is not elapsed', async function () {
       await comEth.connect(bob).addUser();
-      await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.1') });
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       const tx = await comEth.getUser(bob.address);
       expect(tx.isBanned).to.equal(false);
     });
-    it('should return if isBanned if not active when cycle is elapsed', async function () {
+    it('should return if isActive when cycle is elapsed', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).toggleIsActive();
-      await ethers.provider.send('evm_increaseTime', [3600 * 24 * 15]);
-      await ethers.provider.send('evm_mine');
+      /* await ethers.provider.send('evm_increaseTime', [3600 * 24 * 15]);
+      await ethers.provider.send('evm_mine'); */
       const tx = await comEth.getUser(bob.address);
       expect(tx.isActive).to.equal(false);
     });
-    it('should return if isBanned is true', async function () {
+    it('should revert if isBanned is true', async function () {
       await comEth.connect(eve).addUser();
       await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
-      await comEth
-        .connect(eve)
-        .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'));
-      const tx = await comEth.getUser(eve.address);
-      expect(tx.isBanned).to.equal(true);
+      await comEth.connect(bob).addUser();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.connect(bob).quitComEth();
+      await ethers.provider.send('evm_increaseTime', [2629800]);
+      await ethers.provider.send('evm_mine');
+      await expect(comEth.connect(eve).toggleIsActive()).to.be.revertedWith('Cometh: user is banned');
     });
   });
   describe('addUsers', function () {

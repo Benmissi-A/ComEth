@@ -3,9 +3,8 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract ComEth is AccessControl {
+contract ComEth {
     using Address for address payable;
     using Counters for Counters.Counter;
 
@@ -67,38 +66,31 @@ contract ComEth is AccessControl {
     event IsBanned(address user, bool status);
 
     modifier isNotBanned() {
+        if (block.timestamp > _cycleStart + _subscriptionTimeCycle) {
+            _cycleStart = _cycleStart + _subscriptionTimeCycle;
+            if ((_users[msg.sender].hasPaid == false) && (_users[msg.sender].isActive == true) && (_users[msg.sender].unpaidSubscriptions > 1 )) {
+                _users[msg.sender].isBanned = true;
+                _users[msg.sender].unpaidSubscriptions += 1;
+            }
         require(_users[msg.sender].isBanned == false, "Cometh: user is banned");
         _;
-    }
+    }}
+
     modifier isActive() {
         require(_users[msg.sender].isActive == true, "Cometh: user is not active");
         _;
     }
+
     modifier hasPaid() {
+        if(_userTimeStamp[msg.sender] != _cycleStart) {
+            _users[msg.sender].hasPaid = false;
+        }
         require(_users[msg.sender].hasPaid == true, "Cometh: user has not paid subscription");
         _;
     }
 
     modifier userExist() {
         require(_users[msg.sender].exists == true, "ComEth: User is not part of the ComEth");
-        _;
-    }
-
-    modifier CheckSubscription() {
-        // 1 on check le cycle
-        if (block.timestamp > _cycleStart + _subscriptionTimeCycle) {
-            _cycleStart = _cycleStart + _subscriptionTimeCycle;
-            // 2 si nouveau cycle on check si l'utilisateur etait a jour
-            if ((_users[msg.sender].hasPaid == false) && (_users[msg.sender].isActive == true)) {
-                //   s'il ne l'etait pas alors ...
-                _users[msg.sender].isBanned = true;
-                _users[msg.sender].unpaidSubscriptions += 1;
-            }
-            //   s'il l'etait alors ...
-            _users[msg.sender].hasPaid = false;
-        }
-        //   on revert dans le cas ou il 'et pas a jour
-        require(_userTimeStamp[msg.sender] == _cycleStart, "ComEth: You need to pay your subscription(s)");
         _;
     }
 
@@ -110,7 +102,6 @@ contract ComEth is AccessControl {
     }
 
     receive() external payable {
-        _deposit();
     }
 
     function submitProposal(
@@ -119,7 +110,7 @@ contract ComEth is AccessControl {
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
-    ) public CheckSubscription isNotBanned isActive hasPaid returns (uint256) {
+    ) public isNotBanned isActive hasPaid returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
 
@@ -147,7 +138,7 @@ contract ComEth is AccessControl {
         return _proposalsList;
     }
 
-    function vote(uint256 id_, uint256 userChoice_) public CheckSubscription isNotBanned hasPaid isActive {
+    function vote(uint256 id_, uint256 userChoice_) public isNotBanned hasPaid isActive {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
@@ -175,7 +166,7 @@ contract ComEth is AccessControl {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function toggleIsActive() public CheckSubscription isNotBanned returns (bool) {
+    function toggleIsActive() public isNotBanned returns(bool) {
         if (_users[msg.sender].isActive == false) {
             _users[msg.sender].isActive = true;
             _nbActiveUsers += 1;
@@ -201,14 +192,13 @@ contract ComEth is AccessControl {
     }
 
     function _deposit() private {
-        _investMentBalances[address(this)] += _subscriptionPrice * _users[msg.sender].unpaidSubscriptions;
-        _investMentBalances[msg.sender] += _subscriptionPrice * _users[msg.sender].unpaidSubscriptions;
+        _investMentBalances[address(this)] += getAmountToBePaid(msg.sender);
+        _investMentBalances[msg.sender] += getAmountToBePaid(msg.sender);
         if (_users[msg.sender].isBanned) {
             _users[msg.sender].isBanned = false;
             _users[msg.sender].unpaidSubscriptions = 1;
         }
         _users[msg.sender].hasPaid = true;
-        // payable(msg.sender).transfer(_subscriptionPrice * _users[msg.sender].unpaidSubscriptions);
         emit Deposited(msg.sender, _subscriptionPrice * _users[msg.sender].unpaidSubscriptions);
     }
 
@@ -219,18 +209,20 @@ contract ComEth is AccessControl {
     }
 
     /// msg.Value will be calculated in the front part and equal getPaymentAmount(msg.sender)
-    function pay() external payable userExist {
+    function pay() external payable userExist isActive {
         require(_users[msg.sender].hasPaid == false, "ComEth: You have already paid your subscription for this month.");
+        require(msg.value >= getAmountToBePaid(msg.sender), "ComEth: unsufficient amount to pay for subscription");
         _userTimeStamp[msg.sender] = _cycleStart;
+        if(msg.value > getAmountToBePaid(msg.sender)) {
+            payable(msg.sender).sendValue(msg.value - getAmountToBePaid(msg.sender));
+        }
         _deposit();
     }
 
     function quitComEth() public userExist {
-        require(
-            !_users[msg.sender].isBanned,
-            "ComEth: You must sort out your subscriptions using the payment function before you leave."
-        );
-        _withdraw();
+        if(!_users[msg.sender].isBanned) {
+            _withdraw();
+        }
         _users[msg.sender].exists = false;
     }
 
@@ -239,7 +231,7 @@ contract ComEth is AccessControl {
         _toggleIsBanned(userAddress_);
     }
 
-    function _toggleIsBanned(address userAddress_) private userExist returns (bool) {
+    function _toggleIsBanned(address userAddress_) private returns (bool) {
         if (_users[userAddress_].isBanned == false) {
             _users[userAddress_].isBanned = true;
             _nbActiveUsers -= 1;
@@ -282,8 +274,5 @@ contract ComEth is AccessControl {
     function getActiveUsersNb() public view returns (uint256) {
         return _nbActiveUsers;
     }
-    /*  
-        - Gérer transactions en token ?
-        - Créer token de gouvernance?
-     */
+
 }
