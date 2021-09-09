@@ -166,15 +166,8 @@ contract ComEth {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function toggleIsActive() public isNotBanned returns(bool) {
-        if (_users[msg.sender].isActive == false) {
-            _users[msg.sender].isActive = true;
-            _nbActiveUsers += 1;
-        } else {
-            _users[msg.sender].isActive = false;
-            _nbActiveUsers -= 1;
-        }
-        return _users[msg.sender].isActive;
+    function toggleIsActive() public isNotBanned {
+
     }
 
     function addUser() public {
