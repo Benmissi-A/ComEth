@@ -266,6 +266,11 @@ contract ComEth {
         return _subscriptionPrice * _users[userAddress].unpaidSubscriptions;
     }
 
+    function getWithdrawalAmount() public view returns (uint256) {
+        uint256 amount = (_investMentBalances[msg.sender] / _investMentBalances[address(this)]) * address(this).balance;
+        return amount;
+    }
+
     function getActiveUsersNb() public view returns (uint256) {
         return _nbActiveUsers;
     }

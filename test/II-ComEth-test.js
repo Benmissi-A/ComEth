@@ -70,7 +70,6 @@ describe('ComEth', function () {
       /* await ethers.provider.send('evm_increaseTime', [3600 * 24 * 15]);
       await ethers.provider.send('evm_mine'); */
       const tx = await comEth.getUser(bob.address);
-      console.log(tx)
       expect(tx.isActive).to.equal(false);
     });
     it('should revert if isBanned is true', async function () {
