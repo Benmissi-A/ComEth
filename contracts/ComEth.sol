@@ -91,7 +91,7 @@ contract ComEth {
     modifier checkSubscription() {
         //on check le cycle
         if (block.timestamp > _cycleStart + _subscriptionTimeCycle) {
-            _cycleStart = _cycleStart + _subscriptionTimeCycle;
+            _cycleStart = _cycleStart + ((block.timestamp - _cycleStart) % _subscriptionTimeCycle);
         }
         //_userTimeStamp[msg.sender] === 0 nouvel inscrit
         if(_userTimeStamp[msg.sender] != 0){
@@ -100,7 +100,7 @@ contract ComEth {
                 // pas besoin de chacker le has paid
                 _users[msg.sender].hasPaid = false;
                 // soit il paye tous les mois de retard
-                if (!_users[msg.sender].isActive) {
+                if (_users[msg.sender].isActive) {
                         _users[msg.sender].unpaidSubscriptions = ((_cycleStart - _userTimeStamp[msg.sender]) % _subscriptionTimeCycle);
                 // pour les autres , a un nouveau cycle egal  1 subscription a payer  ;)
                 }
@@ -239,9 +239,11 @@ contract ComEth {
     }
 
     function quitComEth() public checkSubscription userExist isNotBanned {
-        if(!_users[msg.sender].isBanned) {
+        if(!_users[msg.sender].isBanned && _investMentBalances[msg.sender] > 0) {
             _withdraw();
+            _investMentBalances[address(this)] -= _investMentBalances[msg.sender];
         }
+        _investMentBalances[msg.sender] = 0;
         _users[msg.sender].exists = false;
     }
 

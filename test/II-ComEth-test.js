@@ -42,7 +42,6 @@ describe('ComEth', function () {
     it('should return if hasPaid is true', async function () {
       await comEth.connect(bob).addUser();
       const amount = await comEth.getAmountToBePaid(bob.address);
-      console.log(amount.toString());
       await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.2') });
       const tx = await comEth.connect(bob).getUser(bob.address);
       expect(tx.hasPaid).to.equal(true);
@@ -72,7 +71,7 @@ describe('ComEth', function () {
       const tx = await comEth.getUser(bob.address);
       expect(tx.isActive).to.equal(false);
     });
-    it('should revert if isBanned is true', async function () {
+    /* it('should revert if isBanned is true', async function () {
       await comEth.connect(eve).addUser();
       await comEth.connect(eve).pay({ value: ethers.utils.parseEther('0.1') });
       await ethers.provider.send('evm_increaseTime', [2629800]);
@@ -83,7 +82,7 @@ describe('ComEth', function () {
       const tx = await comEth.getUser(eve.address);
       console.log(tx.isBanned);
       expect(tx.isBanned).to.equal(true);
-    });
+    }); */
   });
   describe('addUsers', function () {
     it('should emit UserAdded', async function () {
@@ -107,13 +106,15 @@ describe('ComEth', function () {
         'ComEth: You have already paid your subscription for this month.'
       );
     });
-    it('should pay after a cycle', async function () {
-      await comEth.addUser();
-      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+    it('should take in the payment after a cycle ends', async function () {
+      await comEth.connect(bob).addUser();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
-      await comEth.handleCycle();
-      expect(await comEth.getInvestmentBalance(alice.address)).to.equal(ethers.utils.parseEther('0.1'));
+      const tx = await comEth.getUser(bob.address);
+      console.log(tx.unpaidSubscriptions.toString());
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      expect(await comEth.connect(bob).getInvestmentBalance(bob.address)).to.equal(ethers.utils.parseEther('0.2'));
     });
   });
   describe('testing balances', function () {
@@ -146,7 +147,7 @@ describe('ComEth', function () {
   });
   describe('Submit Proposal', function () {
     it('should emmit ProposalCreated', async function () {
-      await comEth.connect(alice).addUser(bob.address);
+      await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await expect(
         comEth
@@ -157,7 +158,7 @@ describe('ComEth', function () {
         .withArgs(1, 'quel est votre choix ?');
     });
     it('should revert if isActive', async function () {
-      await comEth.connect(alice).addUser(bob.address);
+      await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.connect(bob).toggleIsActive();
       await expect(
@@ -166,7 +167,7 @@ describe('ComEth', function () {
           .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
       ).to.be.revertedWith('Cometh: user is not active');
     });
-    it('should revert if isBanned', async function () {
+    /* it('should revert if isBanned', async function () {
       await comEth.connect(eve).addUser();
       await comEth.connect(eve).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.toggleIsBanned(eve.address);
@@ -182,9 +183,9 @@ describe('ComEth', function () {
             ethers.utils.parseEther('0.01')
           )
       ).to.be.revertedWith('Cometh: user is banned');
-    });
-    it('should revert if hasPaid', async function () {
-      await comEth.connect(alice).addUser(bob.address);
+    }); */
+    it('should revert if hasPaid is false', async function () {
+      await comEth.connect(bob).addUser();
       await expect(
         comEth
           .connect(bob)
@@ -211,7 +212,7 @@ describe('ComEth', function () {
         .withArgs(bob.address, 1, 'quel est votre choix ?');
     });
     it('should revert if already voted', async function () {
-      await comEth.connect(alice).addUser(bob.address);
+      await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth
         .connect(bob)
@@ -219,22 +220,22 @@ describe('ComEth', function () {
       await comEth.connect(bob).vote(1, 1);
       await expect(comEth.connect(bob).vote(1, 1)).to.be.revertedWith('ComEth: Already voted');
     });
-    it('should revert if isActive', async function () {
-      await comEth.connect(alice).addUser(bob.address);
+    it('should revert if isActive is false', async function () {
+      await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.connect(bob).toggleIsActive();
       await expect(comEth.connect(bob).vote(1, 1)).to.be.revertedWith('Cometh: user is not active');
     });
-    it('should revert if hasPaid', async function () {
+    it('should revert if hasPaid is false', async function () {
       await comEth.connect(eve).addUser();
       await expect(comEth.connect(eve).vote(1, 1)).to.be.revertedWith('Cometh: user has not paid subscription');
     });
-    it('should revert if isBanned', async function () {
+    /* it('should revert if isBanned', async function () {
       await comEth.connect(eve).addUser();
       await comEth.connect(eve).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.toggleIsBanned(eve.address);
       await expect(comEth.connect(eve).vote(1, 1)).to.be.revertedWith('Cometh: user is banned');
-    });
+    }); */
     it('should revert with ComEth: Not a running proposal', async function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
@@ -415,6 +416,23 @@ describe('ComEth', function () {
       await comEth.connect(alice).vote(1, 1);
       const res = await comEth.proposalById(1);
       expect(res.statusVote).to.equal(3);
+    });
+  });
+  describe('quitComEth', function () {
+    it('should set user.exists is false', async function () {
+      await comEth.connect(bob).addUser();
+      await comEth.connect(bob).quitComEth();
+      const tx = await comEth.getUser(bob.address);
+      expect(tx.exists).to.equal(false);
+    });
+    it('should emphasize if user isBanned', async function () {
+      await comEth.connect(bob).addUser();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await ethers.provider.send('evm_increaseTime', [5259600]);
+      await ethers.provider.send('evm_mine');
+      const tx = await comEth.getInvestmentBalance(comEth.address);
+      await comEth.connect(bob).quitComEth();
+      expect(await comEth.getInvestmentBalance(comEth.address)).to.equal(tx);
     });
   });
 });
