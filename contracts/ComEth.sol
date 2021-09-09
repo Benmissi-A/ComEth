@@ -127,6 +127,7 @@ contract ComEth {
         _timeLimits[id] = timeLimit_;
         _proposalsList.push(_proposals[id]);
         emit ProposalCreated(id, _proposals[id].proposition);
+        
         return id;
     }
 
@@ -166,8 +167,9 @@ contract ComEth {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function toggleIsActive() public isNotBanned {
-
+    function toggleIsActive() public returns(bool){
+        _users[msg.sender].isActive = !_users[msg.sender].isActive;
+        return _users[msg.sender].isActive;
     }
 
     function addUser() public {
