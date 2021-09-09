@@ -44,7 +44,7 @@ describe('ComEth', function () {
       await comEth.connect(bob).addUser();
       const amount = await comEth.getAmountToBePaid(bob.address);
       console.log(amount.toString());
-      await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.1') });
+      await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.2') });
       const tx = await comEth.connect(bob).getUser(bob.address);
       expect(tx.hasPaid).to.equal(true);
     });

@@ -89,15 +89,29 @@ contract ComEth {
     }
 
     modifier checkSubscription() {
+        //on check le cycle
         if (block.timestamp > _cycleStart + _subscriptionTimeCycle) {
             _cycleStart = _cycleStart + _subscriptionTimeCycle;
         }
-        if(_userTimeStamp[msg.sender] != _cycleStart) {
-            _users[msg.sender].hasPaid = false;
-        }
-        if ((_users[msg.sender].hasPaid == false) && (_users[msg.sender].isActive == true)) {
-                _users[msg.sender].unpaidSubscriptions += ((_cycleStart - _userTimeStamp[msg.sender]) % _subscriptionTimeCycle);
+        //_userTimeStamp[msg.sender] === 0 nouvel inscrit
+        if(_userTimeStamp[msg.sender] != 0){
+            // pour les autres , onchecke s'ils ont payé
+            if(_userTimeStamp[msg.sender] <= _cycleStart) {
+                // pas besoin de chacker le has paid
+                _users[msg.sender].hasPaid = false;
+                // soit il paye tous les mois de retard
+                if (!_users[msg.sender].isActive) {
+                        _users[msg.sender].unpaidSubscriptions = ((_cycleStart - _userTimeStamp[msg.sender]) % _subscriptionTimeCycle);
+                // pour les autres , a un nouveau cycle egal  1 subscription a payer  ;)
+                }else{
+                     _users[msg.sender].unpaidSubscriptions = 1;   
+                } 
+                }
             }
+            //on remet tout a jour  avec le nouveau cycle start
+            // haspaid et banned sont pris en compte par les autres modifier ;)
+            // a tester ^^
+            
         _userTimeStamp[msg.sender] = _cycleStart;
         _;
     }
@@ -151,7 +165,6 @@ contract ComEth {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
-        //_handleCycle();
         if (block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
             if (_proposals[id_].voteCount[userChoice_] > (_nbActiveUsers / 2)) {
                 _proposals[id_].statusVote = StatusVote.Approved;
@@ -214,8 +227,9 @@ contract ComEth {
 
     /// msg.Value will be calculated in the front part and equal getPaymentAmount(msg.sender)
     function pay() external payable userExist checkSubscription isActive {
+        //uint256 fees = _subscriptionPrice * _users[msg.sender].unpaidSubscriptions;
         require(_users[msg.sender].hasPaid == false, "ComEth: You have already paid your subscription for this month.");
-        //require(msg.value >= (_subscriptionPrice * _users[msg.sender].unpaidSubscriptions), "ComEth: unsufficient amount to pay for subscription");
+        require(  msg.value >= _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions, "ComEth: unsufficient amount to pay for subscription");
         //_userTimeStamp[msg.sender] = _cycleStart;
         _users[msg.sender].hasPaid = true;
         if(msg.value > getAmountToBePaid(msg.sender)) {
