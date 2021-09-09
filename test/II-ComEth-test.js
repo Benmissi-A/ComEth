@@ -40,7 +40,7 @@ describe('ComEth', function () {
     // les variables d'etat ont les proprietes de la struct User du smartContrat
 
     it('should return if hasPaid is true', async function () {
-      //100000000000000000
+   
       await comEth.connect(bob).addUser();
       const amount = await comEth.getAmountToBePaid(bob.address);
       console.log(amount.toString());

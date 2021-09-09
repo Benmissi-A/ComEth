@@ -96,22 +96,22 @@ contract ComEth {
         //_userTimeStamp[msg.sender] === 0 nouvel inscrit
         if(_userTimeStamp[msg.sender] != 0){
             // pour les autres , onchecke s'ils ont payé
-            if(_userTimeStamp[msg.sender] <= _cycleStart) {
+            if(_userTimeStamp[msg.sender] < _cycleStart) {
                 // pas besoin de chacker le has paid
                 _users[msg.sender].hasPaid = false;
                 // soit il paye tous les mois de retard
                 if (!_users[msg.sender].isActive) {
                         _users[msg.sender].unpaidSubscriptions = ((_cycleStart - _userTimeStamp[msg.sender]) % _subscriptionTimeCycle);
                 // pour les autres , a un nouveau cycle egal  1 subscription a payer  ;)
-                }else{
-                     _users[msg.sender].unpaidSubscriptions = 1;   
-                } 
+                }
                 }
             }
+
+
             //on remet tout a jour  avec le nouveau cycle start
             // haspaid et banned sont pris en compte par les autres modifier ;)
             // a tester ^^
-            
+
         _userTimeStamp[msg.sender] = _cycleStart;
         _;
     }
