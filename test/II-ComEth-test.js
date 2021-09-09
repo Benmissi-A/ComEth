@@ -40,10 +40,12 @@ describe('ComEth', function () {
     // les variables d'etat ont les proprietes de la struct User du smartContrat
 
     it('should return if hasPaid is true', async function () {
-      //
+      //100000000000000000
       await comEth.connect(bob).addUser();
+      const amount = await comEth.getAmountToBePaid(bob.address);
+      console.log(amount.toString());
       await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.1') });
-      const tx = await comEth.getUser(bob.address);
+      const tx = await comEth.connect(bob).getUser(bob.address);
       expect(tx.hasPaid).to.equal(true);
     });
     it('should return if hasPaid is false', async function () {

@@ -215,8 +215,8 @@ contract ComEth {
     /// msg.Value will be calculated in the front part and equal getPaymentAmount(msg.sender)
     function pay() external payable userExist checkSubscription isActive {
         require(_users[msg.sender].hasPaid == false, "ComEth: You have already paid your subscription for this month.");
-        require(msg.value >= getAmountToBePaid(msg.sender), "ComEth: unsufficient amount to pay for subscription");
-        _userTimeStamp[msg.sender] = _cycleStart;
+        //require(msg.value >= (_subscriptionPrice * _users[msg.sender].unpaidSubscriptions), "ComEth: unsufficient amount to pay for subscription");
+        //_userTimeStamp[msg.sender] = _cycleStart;
         _users[msg.sender].hasPaid = true;
         if(msg.value > getAmountToBePaid(msg.sender)) {
             payable(msg.sender).sendValue(msg.value - getAmountToBePaid(msg.sender));
