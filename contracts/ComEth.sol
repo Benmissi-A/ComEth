@@ -69,8 +69,8 @@ contract ComEth {
         if(_users[msg.sender].unpaidSubscriptions > 1) {
             _users[msg.sender].isBanned = true;
         }
-        require(_users[msg.sender].isBanned == false, "Cometh: user is banned");
-        _;
+/*         require(_users[msg.sender].isBanned == false, "Cometh: user is banned");
+ */        _;
     }
 
     modifier isActive() {
@@ -118,7 +118,7 @@ contract ComEth {
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
-    ) public isNotBanned isActive hasPaid returns (uint256) {
+    ) public isActive checkSubscription hasPaid returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
 
@@ -139,15 +139,15 @@ contract ComEth {
         return id;
     }
 
-    function proposalById(uint256 id_) public view userExist returns (Proposal memory) {
+    function proposalById(uint256 id_) public view returns (Proposal memory) {
         return _proposals[id_];
     }
 
-    function getProposalsList() public view userExist returns (Proposal[] memory) {
+    function getProposalsList() public view returns (Proposal[] memory) {
         return _proposalsList;
     }
 
-    function vote(uint256 id_, uint256 userChoice_) public isNotBanned hasPaid isActive {
+    function vote(uint256 id_, uint256 userChoice_) public userExist isActive checkSubscription hasPaid  {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
@@ -176,6 +176,7 @@ contract ComEth {
     }
 
     function toggleIsActive() public isNotBanned returns(bool){
+        require(_users[msg.sender].isBanned == false, "ComEth: You can not use this function if you are banned.");
         _users[msg.sender].isActive = !_users[msg.sender].isActive;
         return _users[msg.sender].isActive;
     }
@@ -223,7 +224,7 @@ contract ComEth {
         _deposit();
     }
 
-    function quitComEth() public userExist {
+    function quitComEth() public userExist isNotBanned {
         if(!_users[msg.sender].isBanned) {
             _withdraw();
         }
