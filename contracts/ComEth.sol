@@ -68,6 +68,7 @@ contract ComEth {
     modifier isNotBanned() {
         if(_users[msg.sender].unpaidSubscriptions > 1) {
             _users[msg.sender].isBanned = true;
+            _nbActiveUsers -= 1;
         }
 /*         require(_users[msg.sender].isBanned == false, "Cometh: user is banned");
  */        _;
@@ -106,7 +107,6 @@ contract ComEth {
                 }
                 }
             }
-
 
             //on remet tout a jour  avec le nouveau cycle start
             // haspaid et banned sont pris en compte par les autres modifier ;)
@@ -188,7 +188,7 @@ contract ComEth {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function toggleIsActive() public isNotBanned returns(bool){
+    function toggleIsActive() public checkSubscription isNotBanned returns(bool){
         require(_users[msg.sender].isBanned == false, "ComEth: You can not use this function if you are banned.");
         _users[msg.sender].isActive = !_users[msg.sender].isActive;
         return _users[msg.sender].isActive;
@@ -213,8 +213,8 @@ contract ComEth {
         _investMentBalances[msg.sender] += getAmountToBePaid(msg.sender);
         if (_users[msg.sender].isBanned) {
             _users[msg.sender].isBanned = false;
-            _users[msg.sender].unpaidSubscriptions = 1;
         }
+        _users[msg.sender].unpaidSubscriptions = 0;
         _users[msg.sender].hasPaid = true;
         emit Deposited(msg.sender, _subscriptionPrice * _users[msg.sender].unpaidSubscriptions);
     }

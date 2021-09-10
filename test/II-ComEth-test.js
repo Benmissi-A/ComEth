@@ -109,12 +109,20 @@ describe('ComEth', function () {
     it('should take in the payment after a cycle ends', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      const tx = await comEth.getUser(bob.address);
+      console.log(tx.hasPaid, tx.unpaidSubscriptions.toString());
       await ethers.provider.send('evm_increaseTime', [2629800]);
       await ethers.provider.send('evm_mine');
-      const tx = await comEth.getUser(bob.address);
-      console.log(tx.unpaidSubscriptions.toString());
-      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
-      expect(await comEth.connect(bob).getInvestmentBalance(bob.address)).to.equal(ethers.utils.parseEther('0.2'));
+      
+      const txa = await comEth.getUser(bob.address);
+      console.log(txa.hasPaid, txa.unpaidSubscriptions.toString());
+      //await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+       await expect(
+         comEth
+           .connect(bob)
+           .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
+       ).to.be.revertedWith('Cometh: user has not paid subscription');
+      // expect(await comEth.connect(bob).getAmountToBePaid(bob.address)).to.equal(ethers.utils.parseEther('0.1'));
     });
   });
   describe('testing balances', function () {
