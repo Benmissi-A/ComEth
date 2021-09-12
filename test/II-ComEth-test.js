@@ -4,6 +4,7 @@
 /* eslint-disable no-unused-vars */
 
 const { expect } = require('chai');
+const { ethers } = require('hardhat');
 
 /*
 addUser -OK
@@ -61,7 +62,8 @@ describe('ComEth', function () {
     it('should revert as isBanned is true (unpaidSubscriptions >= 2)', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
-      await ethers.provider.send('evm_increaseTime', [6580000]);
+      // 5443200 increase time of 9 weeks (2 full cycles + 1 week) so: 2 unpaidSubscriptions
+      await ethers.provider.send('evm_increaseTime', [5443200]);
       await ethers.provider.send('evm_mine');
       await expect(
         comEth
@@ -466,29 +468,23 @@ describe('ComEth', function () {
       const tx = await comEth.getUser(bob.address);
       expect(tx.isBanned).to.equal(true);
     });
-    // isBanned pas mis à jour après increaseTime!
+    // test marche mais il faut mettre require user.exists à toggleIsBanned sinon pas de sens
     it('should set isBanned as false', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.addUser();
       await ethers.provider.send('evm_increaseTime', [7259600]);
       await ethers.provider.send('evm_mine');
+      await comEth.connect(bob).quitComEth();
+      await comEth.addUser();
       await comEth.toggleIsBanned(bob.address);
       const tx = await comEth.getUser(bob.address);
       expect(tx.isBanned).to.equal(false);
     });
   });
   describe('getters', function () {
-    it('should return _users[userAddress_]', async function () {
+    it('should return _users[userAddress_] through getUser', async function () {
       await comEth.connect(bob).addUser();
       const tx = await comEth.getUser(bob.address);
-      // expect(tx.userAddress).to.equal(bob.address);
-      expect(tx.toString()).to.equal(`${bob.address},${false},${false},${true},${true},${1}`);
-    });
-    it('should return _users[userAddress_]', async function () {
-      await comEth.connect(bob).addUser();
-      const tx = await comEth.getUser(bob.address);
-      // expect(tx.userAddress).to.equal(bob.address);
       expect(tx.toString()).to.equal(`${bob.address},${false},${false},${true},${true},${1}`);
     });
     it('should return investmentBalance of this.address', async function () {
@@ -500,7 +496,7 @@ describe('ComEth', function () {
       await comEth.pay({ value: ethers.utils.parseEther('0.2') });
       expect(await comEth.getInvestmentBalance(comEth.address)).to.equal(ethers.utils.parseEther('0.3'));
     });
-    //pb calcul amountToBePaid
+    // pb calcul amountToBePaid
     it('should return investmentBalance of bob', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
@@ -511,6 +507,60 @@ describe('ComEth', function () {
       await ethers.provider.send('evm_mine');
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.2') });
       expect(await comEth.getInvestmentBalance(bob.address)).to.equal(ethers.utils.parseEther('0.3'));
+    });
+    it('should return the balance of the contract', async function () {
+      await comEth.connect(bob).addUser();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.addUser();
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+      expect(await comEth.getBalance()).to.equal(ethers.utils.parseEther('0.2'));
+    });
+    it('should return the timestamp of current cycle start', async function () {
+      await comEth.addUser();
+      await ethers.provider.send('evm_increaseTime', [2505600]);
+      await ethers.provider.send('evm_mine');
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+      const tx = await comEth.getCreationTime();
+      const nb = Number(tx) + 2419200;
+      expect(await comEth.getCycle()).to.equal(`${nb}`);
+    });
+    it('should return the price of the subscription', async function () {
+      expect(await comEth.getSubscriptionPrice()).to.equal(ethers.utils.parseEther('0.1'));
+    });
+    it('should return the number of unpaidSubscriptions', async function () {
+      await comEth.addUser();
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+      await ethers.provider.send('evm_increaseTime', [5443200]);
+      await ethers.provider.send('evm_mine');
+      await comEth.quitComEth();
+      expect(await comEth.getUnpaidSubscriptions(alice.address)).to.equal(2);
+    });
+    it('should return the right amount to be paid', async function () {
+      await comEth.addUser();
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+      await ethers.provider.send('evm_increaseTime', [5443200]);
+      await ethers.provider.send('evm_mine');
+      await comEth.quitComEth();
+      expect(await comEth.getAmountToBePaid(alice.address)).to.equal(ethers.utils.parseEther('0.2'));
+    });
+    // getWithdrawalAmount marche pas ???
+    it('should return the amount you would withdraw by quitting comEth', async function () {
+      await comEth.addUser();
+      await comEth.connect(bob).addUser();
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await ethers.provider.send('evm_increaseTime', [5443200]);
+      await ethers.provider.send('evm_mine');
+      await comEth.pay({ value: ethers.utils.parseEther('0.2') });
+      expect(await comEth.getWithdrawalAmount()).to.equal(ethers.utils.parseEther('0.3'));
+    });
+    it('should return the right number of active users', async function () {
+      await comEth.addUser();
+      await comEth.connect(bob).addUser();
+      await comEth.connect(eve).addUser();
+      await comEth.toggleIsBanned(eve.address);
+      await comEth.toggleIsActive();
+      expect(await comEth.getActiveUsersNb()).to.equal(1);
     });
   });
 });
