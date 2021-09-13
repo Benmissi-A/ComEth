@@ -22,6 +22,7 @@ quitComEth
 
 */
 
+
 /* on teste les fonctions du Contrat ComEth */
 describe('ComEth', function () {
   // la liste des signers qui seront utilisés dans les tests
@@ -421,42 +422,14 @@ describe('ComEth', function () {
     });
     // pb calcul amountToBePaid
     it('should return investmentBalance of bob', async function () {
-      const cycleStart = await comEth.getCycle();
-      console.log('initial cycle', cycleStart.toString());
-      
-      
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
-      
-      await ethers.provider.send('evm_increaseTime', [2600000]);
+      await ethers.provider.send('evm_increaseTime', [2729743]);
       await ethers.provider.send('evm_mine');
-      
-      
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.4') });
-      const cycle = await comEth.getCycle();
-      const subscription = await comEth.getUser(bob.address);
-      const balance = await comEth.getInvestmentBalance(bob.address);
-      console.log(
-        'unpaidSubscriptions',
-        subscription.unpaidSubscriptions.toString(),
-        'cycle after pay',
-        cycle.toString(),
-        'nb cycle',
-        (Number(cycle.toString()) - Number(cycleStart.toString)) % 2419200,
-        'bob balance',
-        balance.toString()
-      );
-      
-      
-   
-      await ethers.provider.send('evm_increaseTime', [2600000]);
+      await ethers.provider.send('evm_increaseTime', [2729743]);
       await ethers.provider.send('evm_mine');
-   
-
-
-      //await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.2') });
-
-    
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.2') });
       expect(await comEth.getInvestmentBalance(bob.address)).to.equal(ethers.utils.parseEther('0.3'));
     });
     it('should return the balance of the contract', async function () {

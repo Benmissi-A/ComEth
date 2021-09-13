@@ -1,3 +1,4 @@
+
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -68,9 +69,9 @@ contract ComEth {
     event IsBanned(address user, bool status);
 
     modifier isNotBanned() {
-        require(_users[msg.sender].isBanned == false, "Cometh: user is banned");
-        _;
-    }
+         require(_users[msg.sender].isBanned == false, "Cometh: user is banned");
+         _;
+    } 
 
     modifier isActive() {
         require(_users[msg.sender].isActive == true, "Cometh: user is not active");
@@ -94,9 +95,9 @@ contract ComEth {
             _cycleStart = newCycleStart;
         }
         //_userTimeStamp[msg.sender] === 0 nouvel inscrit
-        if (_userTimeStamp[msg.sender] != 0) {
+        if(_userTimeStamp[msg.sender] != 0){
             // pour les autres , onchecke s'ils ont payé ce mois
-            if (_userTimeStamp[msg.sender] < _cycleStart) {
+            if(_userTimeStamp[msg.sender] < _cycleStart) {
                 // réinitialisation has paid a false pour prochain cycle
                 _users[msg.sender].hasPaid = false;
                 // réinitialisation du unpaidSubscription
@@ -125,7 +126,8 @@ contract ComEth {
         _cycleStart = block.timestamp;
     }
 
-    receive() external payable {}
+    receive() external payable {
+    }
 
     function submitProposal(
         string memory proposition_,
@@ -149,7 +151,7 @@ contract ComEth {
         _timeLimits[id] = timeLimit_;
         _proposalsList.push(_proposals[id]);
         emit ProposalCreated(id, _proposals[id].proposition);
-
+        
         return id;
     }
 
@@ -173,7 +175,7 @@ contract ComEth {
                 _proposals[id_].statusVote = StatusVote.Rejected;
                 emit Rejected(id_);
             }
-        } else {
+        } else { 
             _hasVoted[msg.sender][id_] = true;
             if(userChoice_ == 1) {
                 _proposals[id_].nbYes += 1;
@@ -198,10 +200,10 @@ contract ComEth {
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function toggleIsActive() public isNotBanned returns (bool) {
+    function toggleIsActive() public isNotBanned returns(bool){
         //require(_users[msg.sender].isBanned == false, "ComEth: You can not use this function if you are banned.");
         _users[msg.sender].isActive = !_users[msg.sender].isActive;
-        if (_users[msg.sender].isActive == false) {
+        if(_users[msg.sender].isActive == false) {
             _nbActiveUsers -= 1;
         } else {
             _nbActiveUsers += 1;
@@ -247,7 +249,6 @@ contract ComEth {
         if(msg.value > _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions) {
             payable(msg.sender).sendValue(msg.value - _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions);
         }
-        _users[msg.sender].unpaidSubscriptions = 0;
         _users[msg.sender].hasPaid = true;
         _deposit();
     }
@@ -267,6 +268,7 @@ contract ComEth {
     }
 
     function _toggleIsBanned(address userAddress_) private returns (bool) {
+        
         if (_users[userAddress_].isBanned == false) {
             _users[userAddress_].isBanned = true;
             _nbActiveUsers -= 1;
