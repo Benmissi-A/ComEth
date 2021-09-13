@@ -8,11 +8,17 @@ contract ComEth {
     using Address for address payable;
     using Counters for Counters.Counter;
 
+// inactive jamais utilisé: supprimé
     enum StatusVote {
-        Inactive,
         Running,
         Approved,
         Rejected
+    }
+
+// on répond juste oui ou non pour savoir si proposition adoptée et paiement débloqué
+    enum Choice {
+        Yes,
+        No
     }
 
     struct User {
@@ -25,6 +31,7 @@ contract ComEth {
     }
 
     struct Proposal {
+        // vote options inutile car juste yes no
         string[] voteOptions;
         uint256[] voteCount;
         StatusVote statusVote;
@@ -182,7 +189,6 @@ contract ComEth {
             }
             emit Voted(msg.sender, id_, _proposals[id_].proposition);
         }
-        
     }
 
     function _proceedPayment(uint256 id_) private {
@@ -227,9 +233,9 @@ contract ComEth {
         emit Deposited(msg.sender, amount);
     }
 
-    function _withdraw() internal {
-        payable(msg.sender).transfer(_investmentBalances[msg.sender] / _investmentBalances[address(this)] * address(this).balance);
-        emit Withdrawn(msg.sender, _investmentBalances[msg.sender] / _investmentBalances[address(this)] * address(this).balance);
+    function _withdraw(uint256 amount) private {
+        payable(msg.sender).sendValue(amount);
+        emit Withdrawn(msg.sender, amount);
     }
 
     /// msg.Value will be calculated in the front part and equal getPaymentAmount(msg.sender)
@@ -243,9 +249,10 @@ contract ComEth {
         _deposit();
     }
 
-    function quitComEth() public payable userExist checkSubscription {
+    function quitComEth() public userExist checkSubscription {
         if(_users[msg.sender].isBanned == false && _investmentBalances[msg.sender] > 0) {
-            _withdraw();
+            uint256 amount = getWithdrawalAmount();
+            _withdraw(amount);
             _investmentBalances[address(this)] -= _investmentBalances[msg.sender];
         }
         _investmentBalances[msg.sender] = 0;
@@ -298,7 +305,7 @@ contract ComEth {
     }
 
     function getWithdrawalAmount() public view returns (uint256) {
-        return ((_investmentBalances[msg.sender] / _investmentBalances[address(this)]) * address(this).balance);
+        return ((((_investmentBalances[msg.sender] * 100) / _investmentBalances[address(this)]) * address(this).balance) / 100 );
     }
 
     function getActiveUsersNb() public view returns (uint256) {
