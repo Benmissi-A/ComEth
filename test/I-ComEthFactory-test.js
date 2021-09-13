@@ -5,7 +5,7 @@
 
 const { expect } = require('chai');
 
-//const { getContractAddress } = require('@ethersproject/address');
+// const { getContractAddress } = require('@ethersproject/address');
 
 describe('ComEthFactory', function () {
   let ComEthFactory, comEthFactory, dev, alice, bob, eve;
@@ -27,7 +27,7 @@ describe('ComEthFactory', function () {
       const futureAddress = '0xa16E02E87b7454126E5E10d957A927A7F5B5d2be';
       await expect(comEthFactory.connect(alice).createComEth(ethers.utils.parseEther('0.1')))
         .to.emit(comEthFactory, 'ComEthCreated')
-        .withArgs(futureAddress, alice.address);
+        .withArgs(futureAddress);
     });
     it('should return factoryOwner ', async function () {
       expect(await comEthFactory.getFactoryOwner()).to.equal(dev.address);

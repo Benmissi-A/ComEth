@@ -1,5 +1,10 @@
 //SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.0;
+
+///@title ComEth
+///@author Amine Benmissi, Guillaume Bezie, Sarah Marques, Stella Soler
+///@notice a DAO-like community budget management tool
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -35,7 +40,6 @@ contract ComEth {
     }
 
     uint256 private _createdAt;
-    address private _comEthOwner;
     uint256 private _subscriptionPrice;
     uint256 private _subscriptionTimeCycle;
     bool private _isActive;
@@ -48,11 +52,8 @@ contract ComEth {
     address private _dev;
 
     mapping(address => uint256) private _userTimeStamp;
-
     mapping(address => User) private _users;
-
     mapping(address => uint256) private _investmentBalances;
-
     mapping(uint256 => Proposal) private _proposals;
     mapping(address => mapping(uint256 => bool)) private _hasVoted;
     mapping(uint256 => uint256) private _timeLimits;
@@ -115,27 +116,49 @@ contract ComEth {
         _;
     }
 
-    constructor(address comEthOwner_, uint256 subscriptionPrice_) {
-        _comEthOwner = comEthOwner_;
+    ///@param subscriptionPrice_ the creator of ComEth chooses the amount of wei to be paid by each user every 4 weeks
+    ///@notice the first cycle starts when the contract is deployed
+    ///@dev no owner foreseen
+    constructor(uint256 subscriptionPrice_) {
         _subscriptionPrice = subscriptionPrice_;
         _subscriptionTimeCycle = 4 weeks;
         _createdAt = block.timestamp;
         _cycleStart = block.timestamp;
-        _dev = msg.sender;
     }
 
     receive() external payable {
     }
 
+    ///@notice add yourself (metamask connected address) as an user of this ComEth
+    function addUser() public {
+        require(_users[msg.sender].exists == false, "ComEth: already an user");
+        _users[msg.sender] = User({
+            userAddress: msg.sender,
+            isBanned: false,
+            hasPaid: false,
+            isActive: true,
+            exists: true,
+            unpaidSubscriptions: 1
+        });
+        _nbActiveUsers += 1;
+        emit UserAdded(msg.sender);
+    }
+
+    ///@notice use this function to submit a proposal for a common budget spending
+    ///@param proposition_ presents your proposal in a few words
+    ///@param timeLimit_ specifies how much time users have to vote for this proposal
+    ///@param paiementReceiver_ specifies the address of the paiement receiver if the proposal is approved
+    ///@param paiementAmount_ specifies the amount of the paiement in weis if the proposal is approved
+    ///@return the unique id of this proposal
     function submitProposal(
         string memory proposition_,
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
     ) public isActive checkSubscription hasPaid returns (uint256) {
+        require(paiementAmount_ <= address(this).balance, "ComEth: not enough funds for this proposal");
         _id.increment();
         uint256 id = _id.current();
-
         _proposals[id] = Proposal({
             nbYes: 0,
             nbNo: 0,
@@ -149,18 +172,19 @@ contract ComEth {
         _timeLimits[id] = timeLimit_;
         _proposalsList.push(_proposals[id]);
         emit ProposalCreated(id, _proposals[id].proposition);
-        
         return id;
     }
 
-    function proposalById(uint256 id_) public view returns (Proposal memory) {
-        return _proposals[id_];
-    }
-
-    function getProposalsList() public view returns (Proposal[] memory) {
-        return _proposalsList;
-    }
-
+    /**@notice make sure you have the active status and have paid your subscription for this cycle.
+        Then specify the id of the proposal you want to vote for, the make your choice.
+    */
+    ///@param id_ specifies the id of the proposal one wants to vote for
+    ///@param userChoice_ represents the voting choice of the user
+    /**@dev this function also resolves the vote. It allows to check if majority is reached. 
+        If so, it will approve the proposal before the end of the voting time limit. 
+        It also gives the status approved of rejected if the time is up.
+        May the proposal be approved, the function will launch the payment.
+    */
     function vote(uint256 id_, uint256 userChoice_) public userExist isActive checkSubscription hasPaid {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
@@ -193,35 +217,27 @@ contract ComEth {
         }
     }
 
+    ///@param id_ of the approved proposal to get its payment executed
     function _proceedPayment(uint256 id_) private {
         payable(_proposals[id_].paiementReceiver).sendValue(_proposals[id_].paiementAmount);
         emit Spent(_proposals[id_].paiementReceiver, _proposals[id_].paiementAmount, id_);
     }
 
-    function toggleIsActive() public isNotBanned returns(bool){
-        _users[msg.sender].isActive = !_users[msg.sender].isActive;
-        if(_users[msg.sender].isActive == false) {
-            _nbActiveUsers -= 1;
-        } else {
-            _nbActiveUsers += 1;
+    /**@notice use this function to proceed to the payment of your current subscription 
+        and all of those you have missed since last payment (if it applies).
+    */
+    ///@dev msg.value will be calculated by the dApp using getPaymentAmount(msg.sender)
+    function pay() external payable userExist isActive checkSubscription {
+        require(_users[msg.sender].hasPaid == false, "ComEth: You have already paid your subscription for this month.");
+        require(msg.value >= (_subscriptionPrice *  _users[msg.sender].unpaidSubscriptions), "ComEth: unsufficient amount to pay for subscription");
+        if(msg.value > _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions) {
+            payable(msg.sender).sendValue(msg.value - _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions);
         }
-        return _users[msg.sender].isActive;
+        _users[msg.sender].hasPaid = true;
+        _deposit();
     }
 
-    function addUser() public {
-        require(_users[msg.sender].exists == false, "ComEth: already an user");
-        _users[msg.sender] = User({
-            userAddress: msg.sender,
-            isBanned: false,
-            hasPaid: false,
-            isActive: true,
-            exists: true,
-            unpaidSubscriptions: 1
-        });
-        _nbActiveUsers += 1;
-        emit UserAdded(msg.sender);
-    }
-
+    ///@dev updates the balances after a payment and the variables isBanned and unpaidSubscriptions of the user
     function _deposit() private {
         uint256 amount = _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions;
         _investmentBalances[address(this)] += amount;
@@ -234,22 +250,26 @@ contract ComEth {
         emit Deposited(msg.sender, amount);
     }
 
-    function _withdraw(uint256 amount) private {
-        payable(msg.sender).sendValue(amount);
-        emit Withdrawn(msg.sender, amount);
-    }
 
-    /// msg.Value will be calculated in the front part and equal getPaymentAmount(msg.sender)
-    function pay() external payable userExist isActive checkSubscription {
-        require(_users[msg.sender].hasPaid == false, "ComEth: You have already paid your subscription for this month.");
-        require(msg.value >= (_subscriptionPrice *  _users[msg.sender].unpaidSubscriptions), "ComEth: unsufficient amount to pay for subscription");
-        if(msg.value > _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions) {
-            payable(msg.sender).sendValue(msg.value - _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions);
+    /**@notice change your status active/inactive with this toggle function 
+    and pause all activity in this ComEth.*/
+    ///@dev changes the isActive status of the user and updates the number of active users
+    ///@return the new isActive status of the user: true for active, false for inactive
+    function toggleIsActive() public isNotBanned returns(bool){
+        _users[msg.sender].isActive = !_users[msg.sender].isActive;
+        if(_users[msg.sender].isActive == false) {
+            _nbActiveUsers -= 1;
+        } else {
+            _nbActiveUsers += 1;
         }
-        _users[msg.sender].hasPaid = true;
-        _deposit();
+        return _users[msg.sender].isActive;
     }
 
+    /**@notice quit your ComEth. To get your share of the common pot you must:
+    - have invested in the ComEth through payments
+    - not be banned 
+    Otherwise you can still quite the ComEth without a payment*/
+    ///@dev proceeds to payment if it applies, updates balances and number of active users
     function quitComEth() public userExist checkSubscription {
         if(_users[msg.sender].isBanned == false && _investmentBalances[msg.sender] > 0) {
             uint256 amount = getWithdrawalAmount();
@@ -258,60 +278,74 @@ contract ComEth {
         }
         _investmentBalances[msg.sender] = 0;
         _users[msg.sender].exists = false;
+        if(_users[msg.sender].isBanned == false && _users[msg.sender].isActive == true) {
+            _nbActiveUsers -= 1;
+        }
+    }
+    
+    ///@param amount of the ether transfer when eligible user quits the ComEth 
+    function _withdraw(uint256 amount) private {
+        payable(msg.sender).sendValue(amount);
+        emit Withdrawn(msg.sender, amount);
     }
 
-    // sert à faire les tests seulement 
-    /* function toggleIsBanned(address userAddress_) public returns (bool) {
-        require(msg.sender == _dev, "ComEth: You are not allowed to use this function");
-        if (_users[userAddress_].isBanned == false) {
-            _users[userAddress_].isBanned = true;
-            _nbActiveUsers -= 1;
-        } else {
-            _users[userAddress_].isBanned = false;
-            _nbActiveUsers += 1;
-        }
-        emit IsBanned(userAddress_, _users[userAddress_].isBanned);
-        return _users[userAddress_].isBanned;    
-        } */
+    ///@param id_ of the proposal to be found
+    ///@return all the data of the proposal
+    function proposalById(uint256 id_) public view returns (Proposal memory) {
+        return _proposals[id_];
+    }
 
+    ///@return all the data of every proposal in an array
+    function getProposalsList() public view returns (Proposal[] memory) {
+        return _proposalsList;
+    }
+
+    ///@param userAddress_ address of the user to be found
+    ///@return all the data of the user
     function getUser(address userAddress_) public view returns (User memory) {
         return _users[userAddress_];
     }
 
+    ///@param userAddress_ address of the user to be checked
+    ///@return the total amount of ether the user has put in the contract ever
     function getInvestmentBalance(address userAddress_) public view returns (uint256) {
         return _investmentBalances[userAddress_];
     }
 
+    ///@return the total amount of ether stocked in this ComEth/contract
     function getBalance() public view returns (uint256) {
         return address(this).balance;
     }
 
+    ///@return the timestamp of the current cycle meaning when it started
     function getCycle() public view returns (uint256) {
         return _cycleStart;
     }
 
+    ///@return the price of the subscription : the amount of weis each user must pay every new cycle
     function getSubscriptionPrice() public view returns (uint256) {
         return _subscriptionPrice;
     }
 
+    ///@param userAddress address of the user to be checked
+    ///@return the number of unpaid subscriptions that the user has
     function getUnpaidSubscriptions(address userAddress) public view returns (uint256) {
         return _users[userAddress].unpaidSubscriptions;
     }
 
+    ///@param userAddress address of the user to be checked
+    ///@return the amount of ether in weis that the user must pay to keep using the ComEth
     function getAmountToBePaid(address userAddress) public view returns (uint256) {
         return _subscriptionPrice * _users[userAddress].unpaidSubscriptions;
     }
 
+    ///@return the amount of ether in wei that an user is eligible to receive if he quits the ComEth
     function getWithdrawalAmount() public view returns (uint256) {
         return ((((_investmentBalances[msg.sender] * 100) / _investmentBalances[address(this)]) * address(this).balance) / 100 );
     }
 
-    // tous les users censés être bannis parce que > 2 impayés
-    // ne seront pas comptés... 
-    /* function getActiveUsersNb() public view returns (uint256) {
-        return _nbActiveUsers;
-    } */
-
+    ///@dev function for testing purpose
+    ///@return the block.timestamp of the deployment of this ComEth/contract
     function getCreationTime() public view returns (uint256) {
         return _createdAt;
     }
