@@ -15,12 +15,6 @@ contract ComEth {
         Rejected
     }
 
-// on répond juste oui ou non pour savoir si proposition adoptée et paiement débloqué
-    enum Choice {
-        Yes,
-        No
-    }
-
     struct User {
         address userAddress;
         bool isBanned;
@@ -31,9 +25,8 @@ contract ComEth {
     }
 
     struct Proposal {
-        // vote options inutile car juste yes no
-        string[] voteOptions;
-        uint256[] voteCount;
+        uint256 nbYes;
+        uint256 nbNo;
         StatusVote statusVote;
         uint256 createdAt;
         address author;
@@ -70,6 +63,7 @@ contract ComEth {
     event ProposalCreated(uint256 id, string description);
     event Voted(address indexed voter, uint256 proposalId, string proposalDescription);
     event Spent(address paymentReceiver, uint256 amount, uint256 proposalId);
+    event Rejected(uint256 proposalId);
     event UserAdded(address indexed newUser);
     event IsBanned(address user, bool status);
 
@@ -134,7 +128,6 @@ contract ComEth {
     receive() external payable {}
 
     function submitProposal(
-        string[] memory voteOptions_,
         string memory proposition_,
         uint256 timeLimit_,
         address paiementReceiver_,
@@ -144,8 +137,8 @@ contract ComEth {
         uint256 id = _id.current();
 
         _proposals[id] = Proposal({
-            voteOptions: voteOptions_,
-            voteCount: new uint256[](voteOptions_.length),
+            nbYes: 0,
+            nbNo: 0,
             statusVote: StatusVote.Running,
             createdAt: block.timestamp,
             author: msg.sender,
@@ -173,18 +166,28 @@ contract ComEth {
         // require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
         if (block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
-            if (_proposals[id_].voteCount[userChoice_] > (_nbActiveUsers / 2)) {
+            if (_proposals[id_].nbYes > (_nbActiveUsers / 2)) {
                 _proposals[id_].statusVote = StatusVote.Approved;
                 _proceedPayment(id_);
             } else {
                 _proposals[id_].statusVote = StatusVote.Rejected;
+                emit Rejected(id_);
             }
         } else {
             _hasVoted[msg.sender][id_] = true;
-            _proposals[id_].voteCount[userChoice_] += 1;
-            if (_proposals[id_].voteCount[userChoice_] > _nbActiveUsers / 2) {
+            if(userChoice_ == 1) {
+                _proposals[id_].nbYes += 1;
+            }
+            if(userChoice_ == 0) {
+                _proposals[id_].nbNo += 1;
+            }
+            if (_proposals[id_].nbYes > _nbActiveUsers / 2) {
                 _proposals[id_].statusVote = StatusVote.Approved;
                 _proceedPayment(id_);
+            }
+            if (_proposals[id_].nbNo > _nbActiveUsers / 2) {
+                _proposals[id_].statusVote = StatusVote.Rejected;
+                emit Rejected(id_);
             }
             emit Voted(msg.sender, id_, _proposals[id_].proposition);
         }
