@@ -35,6 +35,7 @@ contract ComEth {
         uint256 paiementAmount;
     }
 
+    uint256 private _createdAt;
     address private _comEthOwner;
     uint256 private _subscriptionPrice;
     uint256 private _subscriptionTimeCycle;
@@ -88,7 +89,8 @@ contract ComEth {
     modifier checkSubscription() {
         //on check le cycle
         if (block.timestamp > _cycleStart + _subscriptionTimeCycle) {
-            _cycleStart +=  ((block.timestamp - _cycleStart) % _subscriptionTimeCycle)*_subscriptionTimeCycle;
+            uint256 newCycleStart = _cycleStart + ((block.timestamp - _cycleStart) / _subscriptionTimeCycle) * _subscriptionTimeCycle;
+            _cycleStart = newCycleStart;
         }
         //_userTimeStamp[msg.sender] === 0 nouvel inscrit
         if (_userTimeStamp[msg.sender] != 0) {
@@ -98,19 +100,18 @@ contract ComEth {
                 _users[msg.sender].hasPaid = false;
                 // réinitialisation du unpaidSubscription
                 if (_users[msg.sender].isActive) {
-                    _users[msg.sender].unpaidSubscriptions =
-                        (_cycleStart - _userTimeStamp[msg.sender]) %
-                        _subscriptionTimeCycle;
-                    // pour les autres , a un nouveau cycle egal  1 subscription a payer  ;)
+                        _users[msg.sender].unpaidSubscriptions = (_cycleStart - _userTimeStamp[msg.sender]) / _subscriptionTimeCycle;
+                // pour les autres , a un nouveau cycle egal  1 subscription a payer  ;)
+                }
                 }
             }
-        }
-        if (_users[msg.sender].unpaidSubscriptions >= 2) {
-            _users[msg.sender].isBanned = true;
-        }
-        // on remet tout a jour  avec le nouveau cycle start
-        // haspaid et banned sont pris en compte par les autres modifier ;)
-        // a tester ^^
+            if(_users[msg.sender].unpaidSubscriptions >= 2) {
+                _users[msg.sender].isBanned = true;
+                _nbActiveUsers -= 1;
+            }
+            // on remet tout a jour  avec le nouveau cycle start
+            // haspaid et banned sont pris en compte par les autres modifier ;)
+            // a tester ^^
         _userTimeStamp[msg.sender] = _cycleStart;
         _;
     }
@@ -119,6 +120,7 @@ contract ComEth {
         _comEthOwner = comEthOwner_;
         _subscriptionPrice = subscriptionPrice_;
         _subscriptionTimeCycle = 4 weeks;
+        _createdAt = block.timestamp;
         _cycleStart = block.timestamp;
     }
 
@@ -211,11 +213,14 @@ contract ComEth {
         emit UserAdded(msg.sender);
     }
 
-    function _deposit(uint256 amount) private {
+    function _deposit() private {
+        uint256 amount = _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions;
         _investmentBalances[address(this)] += amount;
         _investmentBalances[msg.sender] += amount;
         if (_users[msg.sender].isBanned) {
             _users[msg.sender].isBanned = false;
+            _nbActiveUsers += 1;
+            _users[msg.sender].unpaidSubscriptions = 0;
         }
         emit Deposited(msg.sender, amount);
     }
@@ -225,17 +230,13 @@ contract ComEth {
     /// msg.Value will be calculated in the front part and equal getPaymentAmount(msg.sender)
     function pay() external payable userExist isActive checkSubscription {
         require(_users[msg.sender].hasPaid == false, "ComEth: You have already paid your subscription for this month.");
-        require(
-            msg.value >= (_subscriptionPrice * _users[msg.sender].unpaidSubscriptions),
-            "ComEth: unsufficient amount to pay for subscription"
-        );
-        uint256 amountToBePaid = _subscriptionPrice * _users[msg.sender].unpaidSubscriptions;
-        if (msg.value > amountToBePaid) {
-            payable(msg.sender).sendValue(msg.value - amountToBePaid);
+        require(msg.value >= (_subscriptionPrice *  _users[msg.sender].unpaidSubscriptions), "ComEth: unsufficient amount to pay for subscription");
+        if(msg.value > _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions) {
+            payable(msg.sender).sendValue(msg.value - _subscriptionPrice *  _users[msg.sender].unpaidSubscriptions);
         }
         _users[msg.sender].unpaidSubscriptions = 0;
         _users[msg.sender].hasPaid = true;
-        _deposit(amountToBePaid);
+        _deposit();
     }
 
     function quitComEth() public payable userExist checkSubscription {
@@ -296,11 +297,15 @@ contract ComEth {
     }
 
     function getWithdrawalAmount() public view returns (uint256) {
-        uint256 amount = (_investmentBalances[msg.sender] / _investmentBalances[address(this)]) * address(this).balance;
-        return amount;
+        return ((_investmentBalances[msg.sender] / _investmentBalances[address(this)]) * address(this).balance);
     }
 
     function getActiveUsersNb() public view returns (uint256) {
         return _nbActiveUsers;
     }
+
+    function getCreationTime() public view returns (uint256) {
+        return _createdAt;
+    }
+
 }
