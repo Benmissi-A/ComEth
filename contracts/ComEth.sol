@@ -8,11 +8,17 @@ contract ComEth {
     using Address for address payable;
     using Counters for Counters.Counter;
 
+// inactive jamais utilisé: supprimé
     enum StatusVote {
-        Inactive,
         Running,
         Approved,
         Rejected
+    }
+
+// on répond juste oui ou non pour savoir si proposition adoptée et paiement débloqué
+    enum Choice {
+        Yes,
+        No
     }
 
     struct User {
@@ -25,6 +31,7 @@ contract ComEth {
     }
 
     struct Proposal {
+        // vote options inutile car juste yes no
         string[] voteOptions;
         uint256[] voteCount;
         StatusVote statusVote;
@@ -225,7 +232,10 @@ contract ComEth {
         emit Deposited(msg.sender, amount);
     }
 
-    function _withdraw() internal {}
+    function _withdraw(uint256 amount) private {
+        payable(msg.sender).sendValue(amount);
+        emit Withdrawn(msg.sender, amount);
+    }
 
     /// msg.Value will be calculated in the front part and equal getPaymentAmount(msg.sender)
     function pay() external payable userExist isActive checkSubscription {
@@ -239,10 +249,10 @@ contract ComEth {
         _deposit();
     }
 
-    function quitComEth() public payable userExist checkSubscription {
-        if (_users[msg.sender].isBanned == false && _investmentBalances[msg.sender] > 0) {
-            uint256 getBack = (_investmentBalances[msg.sender] / _investmentBalances[address(this)]) *
-                address(this).balance;
+    function quitComEth() public userExist checkSubscription {
+        if(_users[msg.sender].isBanned == false && _investmentBalances[msg.sender] > 0) {
+            uint256 amount = getWithdrawalAmount();
+            _withdraw(amount);
             _investmentBalances[address(this)] -= _investmentBalances[msg.sender];
             _investmentBalances[msg.sender] = 0;
             payable(msg.sender).transfer(getBack);
@@ -297,7 +307,7 @@ contract ComEth {
     }
 
     function getWithdrawalAmount() public view returns (uint256) {
-        return ((_investmentBalances[msg.sender] / _investmentBalances[address(this)]) * address(this).balance);
+        return ((((_investmentBalances[msg.sender] * 100) / _investmentBalances[address(this)]) * address(this).balance) / 100 );
     }
 
     function getActiveUsersNb() public view returns (uint256) {

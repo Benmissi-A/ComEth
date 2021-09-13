@@ -185,17 +185,13 @@ describe('ComEth', function () {
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       expect(await comEth.getInvestmentBalance(alice.address)).to.equal(ethers.utils.parseEther('0.1'));
     });
-    // transfer ne fonctionne pas dans withdraw!!!
+
     it('should decrement balance after quitting contract', async function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
-      const tx1 = await comEth.getBalance();
-      console.log(tx1.toString());
       await comEth.connect(bob).quitComEth();
-      const tx = await comEth.getBalance();
-      console.log(tx.toString());
       expect(await comEth.getBalance()).to.equal(ethers.utils.parseEther('0.1'));
     });
   });
@@ -302,7 +298,7 @@ describe('ComEth', function () {
       await ethers.provider.send('evm_mine');
       await comEth.connect(bob).vote(1, 1);
       const tx = await comEth.proposalById(1);
-      expect(tx.statusVote).to.equal(3);
+      expect(tx.statusVote).to.equal(2);
     });
   });
 
@@ -403,7 +399,7 @@ describe('ComEth', function () {
         ethers.utils.parseEther('0')
       );
       const res = await comEth.proposalById(1);
-      expect(res.statusVote).to.equal(1);
+      expect(res.statusVote).to.equal(0);
     });
     it('should return proposal[id].statusVote is Approved', async function () {
       await comEth.addUser();
@@ -420,7 +416,7 @@ describe('ComEth', function () {
       await comEth.connect(bob).vote(1, 1);
       await comEth.vote(1, 1);
       const res = await comEth.proposalById(1);
-      expect(res.statusVote).to.equal(2);
+      expect(res.statusVote).to.equal(1);
     });
     it('should return proposal[id].statusVote is Rejected', async function () {
       await comEth.addUser();
@@ -439,7 +435,7 @@ describe('ComEth', function () {
       await ethers.provider.send('evm_mine');
       await comEth.connect(alice).vote(1, 1);
       const res = await comEth.proposalById(1);
-      expect(res.statusVote).to.equal(3);
+      expect(res.statusVote).to.equal(2);
     });
   });
   describe('quitComEth', function () {
