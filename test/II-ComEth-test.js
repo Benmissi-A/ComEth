@@ -66,9 +66,7 @@ describe('ComEth', function () {
       await ethers.provider.send('evm_increaseTime', [5443200]);
       await ethers.provider.send('evm_mine');
       await expect(
-        comEth
-          .connect(bob)
-          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
+        comEth.connect(bob).submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
       ).to.be.revertedWith('Cometh: user is banned');
     });
     it('should return isActive as false', async function () {
@@ -201,9 +199,7 @@ describe('ComEth', function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await expect(
-        comEth
-          .connect(bob)
-          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
+        comEth.connect(bob).submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
       )
         .to.emit(comEth, 'ProposalCreated')
         .withArgs(1, 'quel est votre choix ?');
@@ -213,9 +209,7 @@ describe('ComEth', function () {
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.connect(bob).toggleIsActive();
       await expect(
-        comEth
-          .connect(bob)
-          .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
+        comEth.connect(bob).submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
       ).to.be.revertedWith('Cometh: user is not active');
     });
     it('should revert if isBanned', async function () {
@@ -226,13 +220,7 @@ describe('ComEth', function () {
       await expect(
         comEth
           .connect(eve)
-          .submitProposal(
-            ['A', 'B', 'C'],
-            'quel est votre choix ?',
-            900,
-            alice.address,
-            ethers.utils.parseEther('0.01')
-          )
+          .submitProposal('quel est votre choix ?', 900, alice.address, ethers.utils.parseEther('0.01'))
       ).to.be.revertedWith('Cometh: user is banned');
     });
   });
@@ -241,13 +229,7 @@ describe('ComEth', function () {
     it('should emit Voted', async function () {
       await comEth.addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        bob.address,
-        ethers.utils.parseEther('0.01')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, bob.address, ethers.utils.parseEther('0.01'));
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
 
@@ -260,7 +242,7 @@ describe('ComEth', function () {
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth
         .connect(bob)
-        .submitProposal(['A', 'B', 'C'], 'quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0'));
+        .submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0'));
       await comEth.connect(bob).vote(1, 1);
       await expect(comEth.connect(bob).vote(1, 1)).to.be.revertedWith('ComEth: Already voted');
     });
@@ -286,13 +268,7 @@ describe('ComEth', function () {
       await comEth.connect(eve).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0'));
       await comEth.vote(1, 1);
       await ethers.provider.send('evm_increaseTime', [1000]);
       await ethers.provider.send('evm_mine');
@@ -306,58 +282,39 @@ describe('ComEth', function () {
     it('should return proposal[id].proposition', async function () {
       await comEth.addUser();
       await comEth.connect(alice).pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0.01')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'));
       const res = await comEth.proposalById(1);
       expect(res.proposition).to.equal('quel est votre choix ?');
     });
 
-    it('should return proposal[id].voteOptions[i]', async function () {
-      await comEth.addUser();
-      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0.0')
-      );
-      const res = await comEth.proposalById(1);
-      expect(res.voteOptions[1]).to.equal('B');
-    });
-
-    it('should return proposal[id].voteCount', async function () {
+    it('should return proposal[id].nbYes', async function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0.0')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.0'));
       await comEth.connect(bob).vote(1, 1);
       await comEth.vote(1, 1);
       const res = await comEth.proposalById(1);
-      expect(res.voteCount[1]).to.equal(2);
+      expect(res.nbYes).to.equal(2);
     });
+
+    it('should return proposal[id].nbNo', async function () {
+      await comEth.addUser();
+      await comEth.connect(bob).addUser();
+      await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.pay({ value: ethers.utils.parseEther('0.1') });
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.0'));
+      await comEth.connect(bob).vote(1, 0);
+      await comEth.vote(1, 1);
+      const res = await comEth.proposalById(1);
+      expect(res.nbNo).to.equal(1);
+    });
+
     it('should return proposal[id].author', async function () {
       await comEth.addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0.0')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.0'));
       const res = await comEth.proposalById(1);
       expect(res.author).to.equal(alice.address);
     });
@@ -365,39 +322,21 @@ describe('ComEth', function () {
       await comEth.addUser();
       await comEth.connect(eve).addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0.0')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.0'));
       const res = await comEth.proposalById(1);
       expect(res.paiementReceiver).to.equal(eve.address);
     });
     it('should return proposal[id].paiementAmount', async function () {
       await comEth.addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0'));
       const res = await comEth.proposalById(1);
       expect(res.paiementAmount).to.equal(0);
     });
     it('should return proposal[id].statusVote is Running', async function () {
       await comEth.addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0'));
       const res = await comEth.proposalById(1);
       expect(res.statusVote).to.equal(0);
     });
@@ -406,13 +345,7 @@ describe('ComEth', function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0'));
       await comEth.connect(bob).vote(1, 1);
       await comEth.vote(1, 1);
       const res = await comEth.proposalById(1);
@@ -424,13 +357,7 @@ describe('ComEth', function () {
       await comEth.connect(eve).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.submitProposal(
-        ['A', 'B', 'C'],
-        'quel est votre choix ?',
-        900,
-        eve.address,
-        ethers.utils.parseEther('0')
-      );
+      await comEth.submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0'));
       await ethers.provider.send('evm_increaseTime', [1000]);
       await ethers.provider.send('evm_mine');
       await comEth.connect(alice).vote(1, 1);
