@@ -9,7 +9,6 @@ contract ComEth {
     using Address for address payable;
     using Counters for Counters.Counter;
 
-// inactive jamais utilisé: supprimé
     enum StatusVote {
         Running,
         Approved,
@@ -47,6 +46,7 @@ contract ComEth {
     Proposal[] private _proposalsList;
     Counters.Counter private _id;
     uint256 private _cycleStart;
+    address private _dev;
 
     mapping(address => uint256) private _userTimeStamp;
 
@@ -111,9 +111,7 @@ contract ComEth {
                 _users[msg.sender].isBanned = true;
                 _nbActiveUsers -= 1;
             }
-            // on remet tout a jour  avec le nouveau cycle start
-            // haspaid et banned sont pris en compte par les autres modifier ;)
-            // a tester ^^
+
         _userTimeStamp[msg.sender] = _cycleStart;
         _;
     }
@@ -124,6 +122,7 @@ contract ComEth {
         _subscriptionTimeCycle = 4 weeks;
         _createdAt = block.timestamp;
         _cycleStart = block.timestamp;
+        _dev = msg.sender;
     }
 
     receive() external payable {
@@ -134,7 +133,7 @@ contract ComEth {
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
-    ) public isActive checkSubscription isNotBanned returns (uint256) {
+    ) public isActive checkSubscription hasPaid returns (uint256) {
         _id.increment();
         uint256 id = _id.current();
 
@@ -163,9 +162,9 @@ contract ComEth {
         return _proposalsList;
     }
 
-    function vote(uint256 id_, uint256 userChoice_) public userExist isActive checkSubscription isNotBanned {
+    function vote(uint256 id_, uint256 userChoice_) public userExist isActive checkSubscription hasPaid {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
-        // require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
+        require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
         if (block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
             if (_proposals[id_].nbYes > (_nbActiveUsers / 2)) {
@@ -201,7 +200,6 @@ contract ComEth {
     }
 
     function toggleIsActive() public isNotBanned returns(bool){
-        //require(_users[msg.sender].isBanned == false, "ComEth: You can not use this function if you are banned.");
         _users[msg.sender].isActive = !_users[msg.sender].isActive;
         if(_users[msg.sender].isActive == false) {
             _nbActiveUsers -= 1;
@@ -263,12 +261,9 @@ contract ComEth {
         _users[msg.sender].exists = false;
     }
 
-    function toggleIsBanned(address userAddress_) public userExist {
-        _toggleIsBanned(userAddress_);
-    }
-
-    function _toggleIsBanned(address userAddress_) private returns (bool) {
-        
+    // sert à faire les tests seulement 
+    /* function toggleIsBanned(address userAddress_) public returns (bool) {
+        require(msg.sender == _dev, "ComEth: You are not allowed to use this function");
         if (_users[userAddress_].isBanned == false) {
             _users[userAddress_].isBanned = true;
             _nbActiveUsers -= 1;
@@ -277,8 +272,8 @@ contract ComEth {
             _nbActiveUsers += 1;
         }
         emit IsBanned(userAddress_, _users[userAddress_].isBanned);
-        return _users[userAddress_].isBanned;
-    }
+        return _users[userAddress_].isBanned;    
+        } */
 
     function getUser(address userAddress_) public view returns (User memory) {
         return _users[userAddress_];
@@ -312,12 +307,13 @@ contract ComEth {
         return ((((_investmentBalances[msg.sender] * 100) / _investmentBalances[address(this)]) * address(this).balance) / 100 );
     }
 
-    function getActiveUsersNb() public view returns (uint256) {
+    // tous les users censés être bannis parce que > 2 impayés
+    // ne seront pas comptés... 
+    /* function getActiveUsersNb() public view returns (uint256) {
         return _nbActiveUsers;
-    }
+    } */
 
     function getCreationTime() public view returns (uint256) {
         return _createdAt;
     }
-
 }

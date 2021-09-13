@@ -60,15 +60,14 @@ describe('ComEth', function () {
       expect(tx.isBanned).to.equal(false);
     });
 
-    it('should revert as isBanned is true (unpaidSubscriptions >= 2)', async function () {
+    it('should revert if hasPaid is false', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
-      // 5443200 increase time of 9 weeks (2 full cycles + 1 week) so: 2 unpaidSubscriptions
-      await ethers.provider.send('evm_increaseTime', [5443200]);
+      await ethers.provider.send('evm_increaseTime', [3024000]);
       await ethers.provider.send('evm_mine');
       await expect(
         comEth.connect(bob).submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
-      ).to.be.revertedWith('Cometh: user is banned');
+      ).to.be.revertedWith('Cometh: user has not paid subscription');
     });
     it('should return isActive as false', async function () {
       await comEth.connect(bob).addUser();
@@ -97,12 +96,13 @@ describe('ComEth', function () {
       expect(tx.exists).to.equal(true);
       expect(tx.unpaidSubscriptions).to.equal(1);
     });
-    it('should set nbActiveUsers to 1', async function () {
+    // pas bon si impayés et pas de checkSubscription
+    /* it('should set getActiveUsers to 1', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).toggleIsActive();
       await comEth.connect(eve).addUser();
       expect(await comEth.getActiveUsersNb()).to.equal(1);
-    });
+    }); */
   });
 
   describe('Pay', function () {
@@ -213,16 +213,18 @@ describe('ComEth', function () {
         comEth.connect(bob).submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
       ).to.be.revertedWith('Cometh: user is not active');
     });
-    it('should revert if isBanned', async function () {
+    it('should revert if hasPaid is false', async function () {
       await comEth.connect(eve).addUser();
       await comEth.connect(eve).pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.addUser();
-      await comEth.connect(alice).toggleIsBanned(eve.address);
+      await ethers.provider.send('evm_increaseTime', [3024000]);
+      await ethers.provider.send('evm_mine');
+      /* await comEth.addUser();
+      await comEth.connect(alice).toggleIsBanned(eve.address); */
       await expect(
         comEth
           .connect(eve)
           .submitProposal('quel est votre choix ?', 900, alice.address, ethers.utils.parseEther('0.01'))
-      ).to.be.revertedWith('Cometh: user is banned');
+      ).to.be.revertedWith('Cometh: user has not paid subscription');
     });
   });
 
@@ -256,12 +258,12 @@ describe('ComEth', function () {
     it('should revert if user does not exist', async function () {
       await expect(comEth.vote(1, 1)).to.be.revertedWith('ComEth: User is not part of the ComEth');
     });
-    it('should revert if isBanned', async function () {
+    it('should revert if user has not paid', async function () {
       await comEth.connect(eve).addUser();
       await comEth.connect(eve).pay({ value: ethers.utils.parseEther('0.1') });
-      await comEth.addUser();
-      await comEth.toggleIsBanned(eve.address);
-      await expect(comEth.connect(eve).vote(1, 1)).to.be.revertedWith('Cometh: user is banned');
+      await ethers.provider.send('evm_increaseTime', [3024000]);
+      await ethers.provider.send('evm_mine');
+      await expect(comEth.connect(eve).vote(1, 1)).to.be.revertedWith('Cometh: user has not paid subscription');
     });
     it('should set vote status if time has run out', async function () {
       await comEth.addUser();
@@ -384,7 +386,8 @@ describe('ComEth', function () {
       expect(await comEth.getInvestmentBalance(comEth.address)).to.equal(tx);
     });
   });
-  describe('toggleIsBanned', function () {
+
+  /* describe('toggleIsBanned', function () {
     it('should set isBanned as true', async function () {
       await comEth.connect(bob).addUser();
       await comEth.addUser();
@@ -404,7 +407,8 @@ describe('ComEth', function () {
       const tx = await comEth.getUser(bob.address);
       expect(tx.isBanned).to.equal(false);
     });
-  });
+  }); */
+
   describe('getters', function () {
     it('should return _users[userAddress_] through getUser', async function () {
       await comEth.connect(bob).addUser();
@@ -478,13 +482,15 @@ describe('ComEth', function () {
       await comEth.pay({ value: ethers.utils.parseEther('0.2') });
       expect(await comEth.getWithdrawalAmount()).to.equal(ethers.utils.parseEther('0.3'));
     });
-    it('should return the right number of active users', async function () {
+    // pas bon car ceux qui n'ont pas payé ne devraient pas compter
+    /* it('should return the right number of active users', async function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
       await comEth.connect(eve).addUser();
-      await comEth.toggleIsBanned(eve.address);
+      await ethers.provider.send('evm_increaseTime', [5259600]);
+      await ethers.provider.send('evm_mine');
       await comEth.toggleIsActive();
-      expect(await comEth.getActiveUsersNb()).to.equal(1);
-    });
+      expect(await comEth.getActiveUsersNb()).to.equal(0);
+    }); */
   });
 });
