@@ -34,7 +34,7 @@ describe('ComEth', function () {
     // avant chaque test on deploie comet avec alice comme owner user par defaut
     [dev, alice, bob, eve] = await ethers.getSigners();
     ComEth = await ethers.getContractFactory('ComEth');
-    comEth = await ComEth.connect(alice).deploy(alice.address, subscriptionPrice);
+    comEth = await ComEth.connect(alice).deploy(subscriptionPrice);
     await comEth.deployed();
   });
   describe('Modifiers, variables and getters', function () {
@@ -376,7 +376,7 @@ describe('ComEth', function () {
       expect(tx.exists).to.equal(false);
     });
     // pb: withdraw marche pas
-    it('should emphasize if user isBanned', async function () {
+    it('should not proceed payment to bob if bob isBanned', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       await ethers.provider.send('evm_increaseTime', [5259600]);
