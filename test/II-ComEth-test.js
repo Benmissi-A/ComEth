@@ -4,61 +4,45 @@
 /* eslint-disable no-unused-vars */
 
 const { expect } = require('chai');
-const { ethers } = require('hardhat');
 
-/*
-addUser -OK
-pay -OK
-submitProposal -OK
-vote -OK
-proposalById -OK
-toggleIsActive -OK
-getIsBanned -OK
-getInvestmentBalance
-
-getProposalsList
-getBalance
-quitComEth
-
-*/
-
-/* on teste les fonctions du Contrat ComEth */
 describe('ComEth', function () {
   // la liste des signers qui seront utilisés dans les tests
   let ComEth, comEth, alice, bob, eve;
-  // tarif des cotisations fixe determine au lancement du smartContract
+  // tarif des cotisations fixes determiné au lancement de ComEth
   const subscriptionPrice = ethers.utils.parseEther('0.1');
 
   this.beforeEach(async function () {
-    // avant chaque test on deploie comet avec alice comme owner user par defaut
+    // avant chaque test on deploie comet avec alice comme utilisateur par defaut
     [dev, alice, bob, eve] = await ethers.getSigners();
     ComEth = await ethers.getContractFactory('ComEth');
     comEth = await ComEth.connect(alice).deploy(subscriptionPrice);
     await comEth.deployed();
   });
-  describe('Modifiers, variables and getters', function () {
-    // test des differents modifiers , des fonctions get sont mis en place
-    // les variables d'etat ont les proprietes de la struct User du smartContrat
-
+  // on teste les différents modifiers à l'aide des fonctions de notre contrat
+  // on teste l'exactitude des paramètres de User
+  describe('Modifiers and parameters of User', function () {
+    // on teste la variale hasPaid de user afin que le modifier hasPaid marche
+    // après enregistrement et paiement de l'utilisateur, hasPaid is true
     it('should return hasPaid is true', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.2') });
       const tx = await comEth.connect(bob).getUser(bob.address);
       expect(tx.hasPaid).to.equal(true);
     });
+    // après enregistrement, si utilisateur ne paie pas, hasPaid is false
     it('should return hasPaid is false', async function () {
       await comEth.connect(eve).addUser();
       const tx = await comEth.getUser(eve.address);
       expect(tx.hasPaid).to.equal(false);
     });
-
+    // après simple enregistrement isBanned doit être false
     it('should return isBanned is false', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ from: bob.address, value: ethers.utils.parseEther('0.1') });
       const tx = await comEth.getUser(bob.address);
       expect(tx.isBanned).to.equal(false);
     });
-
+    // si user n'a pas payé 2 souscriptions ou plus, isBanned est true donc submitProposal va revert
     it('should revert if hasPaid is false', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
@@ -68,6 +52,7 @@ describe('ComEth', function () {
         comEth.connect(bob).submitProposal('quel est votre choix ?', 900, eve.address, ethers.utils.parseEther('0.01'))
       ).to.be.revertedWith('Cometh: user has not paid subscription');
     });
+    // si user isActive is true, il devient false après activation du toggleIsActive
     it('should return isActive as false', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).toggleIsActive();
@@ -76,15 +61,18 @@ describe('ComEth', function () {
     });
   });
 
+  // on teste la fonction addUsers()
   describe('addUsers', function () {
+    // elle doit émettre un event UserAdded avec address de user comme argument
     it('should emit UserAdded', async function () {
       await expect(comEth.connect(bob).addUser()).to.emit(comEth, 'UserAdded').withArgs(bob.address);
     });
-
+    // elle doit revert si User existe déjà
     it('should revert because user already exists', async function () {
       await comEth.connect(bob).addUser();
       await expect(comEth.connect(bob).addUser()).to.be.revertedWith('ComEth: already an user');
     });
+    // addUser() doit initialiser User avec les paramètres par défaut
     it('should create User with the struct arguments: address, false, false, true, true, 1', async function () {
       await comEth.connect(bob).addUser();
       const tx = await comEth.getUser(bob.address);
@@ -95,27 +83,24 @@ describe('ComEth', function () {
       expect(tx.exists).to.equal(true);
       expect(tx.unpaidSubscriptions).to.equal(1);
     });
-    // pas bon si impayés et pas de checkSubscription
-    /* it('should set getActiveUsers to 1', async function () {
-      await comEth.connect(bob).addUser();
-      await comEth.connect(bob).toggleIsActive();
-      await comEth.connect(eve).addUser();
-      expect(await comEth.getActiveUsersNb()).to.equal(1);
-    }); */
   });
 
+  // on teste la fonction pay()
   describe('Pay', function () {
+    // elle return hasPaid is true si à jour dans les paiements
     it('should return hasPaid as true when user has paid', async function () {
       await comEth.addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       const tx = await comEth.getUser(alice.address);
       expect(tx.hasPaid).to.equal(true);
     });
+    // elle incrémente la balance de user
     it('should return the right investmentBalance when user has paid', async function () {
       await comEth.addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       expect(await comEth.getInvestmentBalance(alice.address)).to.equal(subscriptionPrice);
     });
+    // elle revert si déjà à jour dans les paiements
     it('should revert if already paid', async function () {
       await comEth.addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
@@ -123,6 +108,7 @@ describe('ComEth', function () {
         'ComEth: You have already paid your subscription for this month.'
       );
     });
+    // le paiement est effectué si user plus à jour dans les paiements
     it('should accept new payment after a cycle ends', async function () {
       await comEth.addUser();
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
@@ -131,25 +117,31 @@ describe('ComEth', function () {
       await comEth.pay({ value: ethers.utils.parseEther('0.1') });
       expect(await comEth.getInvestmentBalance(alice.address)).to.equal(ethers.utils.parseEther('0.2'));
     });
+    /* si msg.value trop élevé, on 'rembourse' le trop perçu, et on
+    incrémente la balance du montant nécessaire uniquement */
     it('should transfer back exceeding weis', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.6') });
       expect(await comEth.getInvestmentBalance(bob.address)).to.equal(ethers.utils.parseEther('0.1'));
     });
+    // un paiement effectué doit émettre un event 'Deposited' avec les arguments address et amount
     it('should emit Deposited', async function () {
       await comEth.addUser();
       await expect(comEth.pay({ value: ethers.utils.parseEther('0.1') }))
         .to.emit(comEth, 'Deposited')
         .withArgs(alice.address, ethers.utils.parseEther('0.1'));
     });
+    // un user ne peut pas payer s'il n'est pas utilisateur enregistré de ComEth
     it('should revert if user does not exist', async function () {
       await expect(comEth.connect(bob).pay()).to.be.revertedWith('ComEth: User is not part of the ComEth');
     });
+    // on ne peut pas payer quand on a pris le statut inactif, on est en sommeil, on doit se réactiver pour participer
     it('should revert if user is not active', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).toggleIsActive();
       await expect(comEth.connect(bob).pay()).to.be.revertedWith('Cometh: user is not active');
     });
+    // si msg.value pas suffisant pour mettre à jour ses souscriptions, revert
     it('should revert if msg.value < amountToBePaid', async function () {
       await comEth.connect(bob).addUser();
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
@@ -161,7 +153,9 @@ describe('ComEth', function () {
     });
   });
 
+  // on teste les balances de notre contrat
   describe('testing balances', function () {
+    // les montants des paiements arrivent dans la balance des ethers stockés dans le contrat
     it('should return balance of contract', async function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
@@ -169,6 +163,7 @@ describe('ComEth', function () {
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       expect(await comEth.getBalance()).to.equal(ethers.utils.parseEther('0.2'));
     });
+    // les montants des paiements doit être incrémenté dans notre balance de ComEth
     it('should return investmentBalance[comEth.address] ', async function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
@@ -176,6 +171,7 @@ describe('ComEth', function () {
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       expect(await comEth.getInvestmentBalance(comEth.address)).to.equal(ethers.utils.parseEther('0.2'));
     });
+    // le montant du paiement d'un user doit incrémenter sa propre balance
     it('should return investmentBalance of user', async function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();
@@ -183,7 +179,7 @@ describe('ComEth', function () {
       await comEth.connect(bob).pay({ value: ethers.utils.parseEther('0.1') });
       expect(await comEth.getInvestmentBalance(alice.address)).to.equal(ethers.utils.parseEther('0.1'));
     });
-
+    //
     it('should decrement balance after quitting contract', async function () {
       await comEth.addUser();
       await comEth.connect(bob).addUser();

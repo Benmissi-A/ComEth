@@ -2,8 +2,9 @@ require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-solhint');
 require('hardhat-docgen');
 require('hardhat-contract-sizer');
-
+require('@nomiclabs/hardhat-web3');
 require('dotenv').config();
+
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
