@@ -40,17 +40,13 @@ contract ComEth {
         uint256 paiementAmount;
     }
 
+
     uint256 private _createdAt;
     uint256 private _subscriptionPrice;
     uint256 private _subscriptionTimeCycle;
-    bool private _isActive;
-    bool private _hasPaid;
     uint256 private _nbActiveUsers;
-    string private _stringVote;
-    Proposal[] private _proposalsList;
     Counters.Counter private _id;
     uint256 private _cycleStart;
-    address private _dev;
 
     mapping(address => uint256) private _userTimeStamp;
     mapping(address => User) private _users;
@@ -89,29 +85,31 @@ contract ComEth {
         _;
     }
 
+    /**@dev to update a users status we use a modifier without a require so that some code 
+        can be processed to check its data before it calls a function.
+        - First we verify if the cycle has finished and launch a new one in case it is true.
+        - Then we check last time the user has paid and reassess its unpaid subscriptions if needed.
+          (Not applicable if new user or if user is not active)
+        - We also set its status to "isBanned" if he has 2 or more unpaid subscriptions.
+          The number of inactive users must be decremented if a user isBanned for the calculation of the majority.
+        - In the case of a new user it is given the current cycle timestamp so that it has only one subscription to pay.*/
     modifier checkSubscription() {
-        //on check le cycle
         if (block.timestamp > _cycleStart + _subscriptionTimeCycle) {
             uint256 newCycleStart = _cycleStart + ((block.timestamp - _cycleStart) / _subscriptionTimeCycle) * _subscriptionTimeCycle;
             _cycleStart = newCycleStart;
         }
-        //_userTimeStamp[msg.sender] === 0 nouvel inscrit
         if(_userTimeStamp[msg.sender] != 0){
-            // pour les autres , onchecke s'ils ont payé ce mois
             if(_userTimeStamp[msg.sender] < _cycleStart) {
-                // réinitialisation has paid a false pour prochain cycle
                 _users[msg.sender].hasPaid = false;
-                // réinitialisation du unpaidSubscription
                 if (_users[msg.sender].isActive) {
                         _users[msg.sender].unpaidSubscriptions = (_cycleStart - _userTimeStamp[msg.sender]) / _subscriptionTimeCycle;
-                // pour les autres , a un nouveau cycle egal  1 subscription a payer  ;)
                 }
                 }
             }
-            if(_users[msg.sender].unpaidSubscriptions >= 2) {
-                _users[msg.sender].isBanned = true;
-                _nbActiveUsers -= 1;
-            }
+        if(_users[msg.sender].unpaidSubscriptions >= 2) {
+            _users[msg.sender].isBanned = true;
+            _nbActiveUsers -= 1;
+        }
 
         _userTimeStamp[msg.sender] = _cycleStart;
         _;
@@ -156,7 +154,7 @@ contract ComEth {
         uint256 timeLimit_,
         address paiementReceiver_,
         uint256 paiementAmount_
-    ) public isActive checkSubscription hasPaid returns (uint256) {
+    ) public userExist isActive checkSubscription hasPaid returns (uint256) {
         require(paiementAmount_ <= address(this).balance, "ComEth: not enough funds for this proposal");
         _id.increment();
         uint256 id = _id.current();
@@ -171,7 +169,6 @@ contract ComEth {
             paiementAmount: paiementAmount_
         });
         _timeLimits[id] = timeLimit_;
-        _proposalsList.push(_proposals[id]);
         emit ProposalCreated(id, _proposals[id].proposition);
         return id;
     }
@@ -191,7 +188,7 @@ contract ComEth {
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
         if (block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
-            if (_proposals[id_].nbYes > (_nbActiveUsers / 2)) {
+            if (_proposals[id_].nbYes * 2 > _nbActiveUsers) {
                 _proposals[id_].statusVote = StatusVote.Approved;
                 _proceedPayment(id_);
             } else {
@@ -206,11 +203,11 @@ contract ComEth {
             if(userChoice_ == 0) {
                 _proposals[id_].nbNo += 1;
             }
-            if (_proposals[id_].nbYes > _nbActiveUsers / 2) {
+            if (_proposals[id_].nbYes * 2 > _nbActiveUsers) {
                 _proposals[id_].statusVote = StatusVote.Approved;
                 _proceedPayment(id_);
             }
-            if (_proposals[id_].nbNo > _nbActiveUsers / 2) {
+            if (_proposals[id_].nbNo * 2 > _nbActiveUsers) {
                 _proposals[id_].statusVote = StatusVote.Rejected;
                 emit Rejected(id_);
             }
@@ -296,11 +293,6 @@ contract ComEth {
         return _proposals[id_];
     }
 
-    ///@return all the data of every proposal in an array
-    function getProposalsList() public view returns (Proposal[] memory) {
-        return _proposalsList;
-    }
-
     ///@param userAddress_ address of the user to be found
     ///@return all the data of the user
     function getUser(address userAddress_) public view returns (User memory) {
@@ -349,5 +341,11 @@ contract ComEth {
     ///@return the block.timestamp of the deployment of this ComEth/contract
     function getCreationTime() public view returns (uint256) {
         return _createdAt;
+    }
+
+    ///@dev its gets the number of total proposals
+    ///@return the id of the last proposal
+    function getId() public view returns(uint256) {
+        return _id.current();
     }
 }
