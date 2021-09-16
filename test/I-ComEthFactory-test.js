@@ -27,11 +27,11 @@ describe('ComEthFactory', function () {
         from: comEthFactory.address,
         nonce: comEthFactory.deployTransaction.nonce + 1,
       });
-      // const futureAddress = '0xa16E02E87b7454126E5E10d957A927A7F5B5d2be';
       await expect(comEthFactory.connect(alice).createComEth(ethers.utils.parseEther('0.1')))
         .to.emit(comEthFactory, 'ComEthCreated')
         .withArgs(futureAddress);
     });
+    //
     it('should return factoryOwner ', async function () {
       expect(await comEthFactory.getFactoryOwner()).to.equal(dev.address);
     });

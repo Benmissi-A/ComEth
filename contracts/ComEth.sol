@@ -32,12 +32,13 @@ contract ComEth {
         uint256 nbYes;
         uint256 nbNo;
         StatusVote statusVote;
-        uint256 endsAt;
+        uint256 createdAt;
         address author;
         string proposition;
         address paiementReceiver;
         uint256 paiementAmount;
     }
+
 
     uint256 private _createdAt;
     uint256 private _subscriptionPrice;
@@ -83,6 +84,14 @@ contract ComEth {
         _;
     }
 
+    /**@dev to update a users status we use a modifier without a require so that some code 
+        can be processed to check its data before it calls a function.
+        - First we verify if the cycle has finished and launch a new one in case it is true.
+        - Then we check last time the user has paid and reassess its unpaid subscriptions if needed.
+          (Not applicable if new user or if user is not active)
+        - We also set its status to "isBanned" if he has 2 or more unpaid subscriptions.
+          The number of inactive users must be decremented if a user isBanned for the calculation of the majority.
+        - In the case of a new user it is given the current cycle timestamp so that it has only one subscription to pay.*/
     modifier checkSubscription() {
         if (block.timestamp > _cycleStart + _subscriptionTimeCycle) {
             uint256 newCycleStart = _cycleStart + ((block.timestamp - _cycleStart) / _subscriptionTimeCycle) * _subscriptionTimeCycle;
@@ -152,7 +161,7 @@ contract ComEth {
             nbYes: 0,
             nbNo: 0,
             statusVote: StatusVote.Running,
-            endsAt: block.timestamp + timeLimit_,
+            createdAt: block.timestamp,
             author: msg.sender,
             proposition: proposition_,
             paiementReceiver: paiementReceiver_,
@@ -177,7 +186,7 @@ contract ComEth {
         require(_hasVoted[msg.sender][id_] == false, "ComEth: Already voted");
         require(_proposals[id_].statusVote == StatusVote.Running, "ComEth: Not a running proposal");
 
-        if (block.timestamp > _proposals[id_].endsAt) {
+        if (block.timestamp > _proposals[id_].createdAt + _timeLimits[id_]) {
             if (_proposals[id_].nbYes * 2 > _nbActiveUsers) {
                 _proposals[id_].statusVote = StatusVote.Approved;
                 _proceedPayment(id_);
