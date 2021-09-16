@@ -12,6 +12,7 @@ import "./ComEth.sol";
 contract ComEthFactory {
 
     address private _factoryOwner;
+    
     event ComEthCreated(address indexed comEthAddress);
 
     ///@param factoryOwner_ the owner of this ComEth Factory contract
